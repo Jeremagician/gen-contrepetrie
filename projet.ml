@@ -39,3 +39,15 @@ let rec supprime (e : 'e)(ens : 'e ensemble) : 'e ensemble =
   match ens with
     | NIL -> NIL
     | Cons(elem, sousEnsemble) -> if(e = elem) then sousEnsemble else Cons(elem, supprime e sousEnsemble);;
+
+let egaux (e1: 'e ensemble)(e2 : 'e ensemble) : bool = inclus e1 e2 && inclus e2 e1;;
+
+let rec intersection (e1 : 'e ensemble)(e2 : 'e ensemble) : 'e ensemble =
+  match e1 with
+    | NIL -> NIL
+    | Cons(elem, ens) -> if appartient elem e2 then Cons(elem, intersection ens e2) else intersection ens e2;;
+
+let rec difference (e1 : 'e ensemble)(e2 : 'e ensemble) : 'e ensemble = 
+  match e1 with
+    | NIL -> NIL
+    | Cons(elem, ens) -> if appartient elem e2 then difference ens e2 else Cons(elem, difference ens e2);;
