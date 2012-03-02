@@ -51,3 +51,21 @@ let rec difference (e1 : 'e ensemble)(e2 : 'e ensemble) : 'e ensemble =
   match e1 with
     | NIL -> NIL
     | Cons(elem, ens) -> if appartient elem e2 then difference ens e2 else Cons(elem, difference ens e2);;
+
+
+(* FIXME: Complexité minimale ? autre solution ? *)
+(* On définit une d'ajout d'ensembles pour faciliter la tache. *)
+let rec ajoute_ensemble ( e1 : 'e ensemble) ( e2 : 'e ensemble) : 'e ensemble = 
+  match e1 with
+    | NIL -> e2
+    | Cons(e, seq) -> Cons(e, ajoute_ensemble(seq)(e2));;
+
+let differencesymetrique ( e1 : 'e ensemble) ( e2 : 'e ensemble) : 'e ensemble = 
+ajoute_ensemble (difference e1 e2)(difference e2 e1);;
+
+let e1 = dbe [1;2;3;4;5];;
+let e2 = dbe [3;4;5;6;7];;
+
+dbl (differencesymetrique e1 e2);;
+
+(* Partie 2 : Multi Elements et Multi Ensembles *)
