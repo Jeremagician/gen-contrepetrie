@@ -167,3 +167,38 @@ let differencesymetrique ( e1 : 'e ensemble) ( e2 : 'e ensemble) : 'e ensemble =
 ajoute_ensemble (difference e1 e2)(difference e2 e1);;
 
 (* Partie 2 : Multi Elements et Multi Ensembles *)
+
+(* Type Multi Element sous la forme
+   du couple (element polymorphe, Occurence)
+   on posera occurence différent de 0 car le multi
+   ensemble perdrait son intérêt ... *)
+type 'e multielt = 'e * int;;
+
+type 'e multiens = VIDE | Add of 'e multielt * 'e multiens;;
+
+let multivide = VIDE;;
+
+let estvidemultiens (ens : 'e multiens) : bool = ens = VIDE;;
+
+let rec cardinalmultiens (ens : 'e multiens) : int * int = 
+  match ens with
+    | VIDE -> (0,0)
+    | Add((elem,count) , subens) -> let (a,b) = cardinalmultiens (subens)
+      in (a+1, b+count);;
+
+let rec occurencesmultiens (e : 'e) (ens : 'e multiens) : int =
+    match ens with
+      | VIDE -> 0
+      | Add((el,count),_) when el = e -> count
+      | Add(_,subseq) -> occurencesmultiens e subseq;;
+
+let appartientmultiens (e :'e) ( ens : 'e multiens) : bool = occurencesmultiens e ens > 0;;
+
+(* TODO: Question, les ensembles peuvent il etres inclus meme si 
+deux memes elements on un nombre different d'occurence ??? *)
+
+let rec inclusmultiens (e1 : 'e multiens)(e2 : 'e multiens) : bool = 
+  match e1 with
+    | VIDE -> true
+    | Add((el, count), subseq) -> appartientmultiens el e2 && inclusmultiens subseq e2;;
+
