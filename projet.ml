@@ -112,7 +112,8 @@ let ajoute (e : 'e) (ens : 'e ensemble): 'e ensemble = Cons(e, ens);;
 let rec supprime (e : 'e)(ens : 'e ensemble) : 'e ensemble =
   match ens with
     | NIL -> NIL
-    | Cons(elem, sousEnsemble) -> if(e = elem) then sousEnsemble else Cons(elem, supprime e sousEnsemble);;
+    | Cons(elem, sousEnsemble) when e = elem -> sousEnsemble
+    | Cons(elem, sousEnsemble) -> Cons(elem, supprime e sousEnsemble);;
 
 (* Specification : 
    Profil : egaux : 'e ensemble -> 'e ensemble -> bool
@@ -138,7 +139,8 @@ let egaux (e1: 'e ensemble)(e2 : 'e ensemble) : bool = inclus e1 e2 && inclus e2
 let rec intersection (e1 : 'e ensemble)(e2 : 'e ensemble) : 'e ensemble =
   match e1 with
     | NIL -> NIL
-    | Cons(elem, ens) -> if appartient elem e2 then Cons(elem, intersection ens e2) else intersection ens e2;;
+    | Cons(elem, sousEnsemble) when appartient elem e2 -> Cons(elem, intersection sousEnsemble e2)
+    | Cons(elem, ens) -> intersection ens e2;;
 
 (* Specification : 
    Profil : difference : 'e ensemble -> 'e ensemble -> 'e ensemble
@@ -153,7 +155,8 @@ let rec intersection (e1 : 'e ensemble)(e2 : 'e ensemble) : 'e ensemble =
 let rec difference (e1 : 'e ensemble)(e2 : 'e ensemble) : 'e ensemble = 
   match e1 with
     | NIL -> NIL
-    | Cons(elem, ens) -> if appartient elem e2 then difference ens e2 else Cons(elem, difference ens e2);;
+    | Cons(elem, ens) when appartient elem e2 -> difference ens e2
+    | Cons(elem, ens) -> Cons(elem, difference ens e2);;
 
 (* FIXME: Complexité minimale ? autre solution ? *)
 (* On définit une d'ajout d'ensembles pour faciliter la tache. *)
