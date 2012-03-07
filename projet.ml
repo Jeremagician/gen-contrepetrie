@@ -15,7 +15,6 @@ Mais l'ensembles des elements doivent
 *)
 type 'e ensemble = NIL | Cons of 'e * 'e ensemble;;
 
-
 (* On définit l'enemblevide égal à NIL *)
 let ensemblevide = NIL;;
 
@@ -176,6 +175,8 @@ type 'e multielt = 'e * int;;
 
 type 'e multiens = VIDE | Add of 'e multielt * 'e multiens;;
 
+#use "quickdev.ml"
+
 let multivide = VIDE;;
 
 let estvidemultiens (ens : 'e multiens) : bool = ens = VIDE;;
@@ -201,4 +202,3 @@ let rec inclusmultiens (e1 : 'e multiens)(e2 : 'e multiens) : bool =
   match e1 with
     | VIDE -> true
     | Add((el, count), subseq) -> appartientmultiens el e2 && inclusmultiens subseq e2;;
-
