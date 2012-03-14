@@ -276,3 +276,26 @@ let rec unionmultiens (ens1:'e multiens) (ens2:'e multiens):'e multiens =
   match ens1 with
     | VIDE -> ens2
     | Add(e, subseq) -> unionmultiens(subseq)(ajoutemultiens e ens2);;
+
+(*
+profil: intersectionmultiens: ’e multiens -> ’e multiens -> ’e multiens 
+semantique: calcule l’intersection de deux multi-ensembles.
+exemples:
+
+Realisation :
+Equations récursives :
+Terminaison :
+implantation : *)
+let rec intersectionmutiens (ens1:'e multiens) (ens2:'e multiens):'e multiens =
+  match ens1 with
+    | VIDE -> VIDE;
+    | Add((e1,occ1), subseq) when appartientmultiens (e1) (ens2) -> 
+
+        let occ2 = occurencesmultiens (e1) (ens2) in	
+      	  if (occ1 <= occ2) then
+	    Add((e1,occ1), intersectionmutiens (subseq) (ens2))
+	  else
+	    Add((e1,occ2), intersectionmutiens (subseq) (ens2))
+
+    | Add(_,subseq) ->  intersectionmutiens (subseq) (ens2);;
+
