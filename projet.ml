@@ -182,8 +182,26 @@ type 'e multiens = VIDE | Add of 'e multielt * 'e multiens;;
 
 let multivide = VIDE;;
 
+(*
+profil: estvidemultiens: ’e multiens→ bool 
+semantique: estvidemultiens (ens1) est vrai si le multi-ensemble ens1 est vide.
+exemples: (1) estvidemultiens (VIDE) = true
+          (2) estvidemultiens (Add((1,1),VIDE) = false
+
+implantation : *)
 let estvidemultiens (ens : 'e multiens) : bool = ens = VIDE;;
 
+(*
+profil: cardinalmultiens:: ’e multiens→ int∗int 
+semantique:  retourne le couple (nombre de multi-éléments, nombre total d’occurences d'éléments).
+exemples: cardinalmultiens (Add((1,2), Add((2,3), VIDE)) = (2,5)
+          cardinalmultiens (VIDE) = (0,0)
+
+
+Realisation :
+Equations récursives :
+Terminaison :
+implantation : *)
 let rec cardinalmultiens (ens : 'e multiens) : int * int = 
   match ens with
     | VIDE -> (0,0)
@@ -280,22 +298,52 @@ let rec unionmultiens (ens1:'e multiens) (ens2:'e multiens):'e multiens =
 (*
 profil: intersectionmultiens: ’e multiens -> ’e multiens -> ’e multiens 
 semantique: calcule l’intersection de deux multi-ensembles.
-exemples:
+exemples: (1) intersectionmultiens (Add((1,2),Add((2,1),VIDE))) (Add((2,1),VIDE)) = (Add((2,1),VIDE))
+          (2) intersectionmultiens (Add((1,3),Add((2,4),VIDE))) (Add((3,3),Add((2,2),VIDE))) = (Add((2,2),VIDE))
 
 Realisation :
 Equations récursives :
 Terminaison :
 implantation : *)
-let rec intersectionmutiens (ens1:'e multiens) (ens2:'e multiens):'e multiens =
+let rec intersectionmultiens (ens1:'e multiens) (ens2:'e multiens):'e multiens =
   match ens1 with
     | VIDE -> VIDE;
     | Add((e1,occ1), subseq) when appartientmultiens (e1) (ens2) -> 
 
         let occ2 = occurencesmultiens (e1) (ens2) in	
       	  if (occ1 <= occ2) then
-	    Add((e1,occ1), intersectionmutiens (subseq) (ens2))
+	    Add((e1,occ1), intersectionmultiens (subseq) (ens2))
 	  else
 	    Add((e1,occ2), intersectionmutiens (subseq) (ens2))
 
-    | Add(_,subseq) ->  intersectionmutiens (subseq) (ens2);;
+    | Add(_,subseq) ->  intersectionmultiens (subseq) (ens2);;
 
+(*
+profil: differencemultiens: ’e multiens -> ’e multiens -> ’e multiens 
+semantique: calcule la différence de deux multi-ensembles.
+exemples:
+
+Realisation :
+Equations récursives :
+Terminaison :
+implantation : *)
+let rec differencemultiens (ens1:'e multiens) (ens2:'e multiens):'e multiens =
+  match ens1 with
+    | VIDE -> ens2
+    | Add((e1,occ1), subseq) when appartientmultiens (e1) (ens2) ->
+        let occ2 = occurencesmultiens (e1) (ens2) in differencemultiens( supprimemultiens (e1,occ2) (ens1) ) (ens2) 
+    | Add(elem,subseq) -> Add(elem, differencemultiens (subseq) (ens2));;
+
+differencemultiens (Add((1,4),Add((2,5),VIDE))) (Add((1,3),Add((2,2),VIDE)));;
+
+(*
+profil: differencesymetriquemultiens: ’e multiens -> ’e multiens -> ’e multiens
+semantique:  calcule la différence symétrique de deux multi-ensembles.
+exemples: (1) 
+
+Realisation :
+Equations récursives :
+Terminaison :
+implantation : *)
+let differencesymetriquemultiens (ens1: 'e multiens) (ens2: 'e multiens) : 'e multiens =
+  differencemultiens (unionmultiens(ens1) (ens2)) (intersectionmultiens (ens1) (ens2));;
