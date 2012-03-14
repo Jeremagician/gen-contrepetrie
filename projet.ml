@@ -6,7 +6,7 @@
 PARTIE I - Ensembles 
 *)
 
-(* Commencons par definir le type ensemble 
+(* Commencons par definir le type ensemble e
 
 Il s'agit ici d'un type dit "polymorphe"
 qui ne prend pas de type particulier,
