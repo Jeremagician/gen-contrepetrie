@@ -227,11 +227,29 @@ Realisation :
 Equations récursives :
 Terminaison :
 implantation : *)
-
 let rec ajoutemultiens ((e1,occ1):'e multielt) (ens:'e multiens): 'e multiens =
-	match ens with
-	| VIDE -> Add((e1,occ1), VIDE)
-	| Add((e2,occ2), subseq) when e1 = e2 -> Add((e1,occ1+occ2), subseq)
-	| Add(e,subseq) -> Add(e,ajoutemultiens(e1,occ1)(subseq));;
+  match ens with
+    | VIDE -> Add((e1,occ1), VIDE)
+    | Add((e2,occ2), subseq) when e1 = e2 -> Add((e1,occ1+occ2), subseq)
+    | Add(e,subseq) -> Add(e,ajoutemultiens(e1,occ1)(subseq));;
 
-ajoutemultiens (3,2)(Add((1,1), Add((2,3), VIDE)));;
+(*
+profil: supprimemultiens: ’e multielt  -> ’e multiens -> ’e multiens 
+semantique: supprime n occurences d’élèment d’un multi-ensemble. Si n est nul, supprime toutes les occurences de cet élément.
+exemples: (1) supprimemultiens (3,2)(Add((1,1), Add((2,3), VIDE))) = Add((1,1), Add((2,3), VIDE))
+          (2) supprimemultiens (2,2)(Add((1,1), Add((2,3), VIDE))) = Add((1,1), Add((2,1), VIDE))
+          (3) supprimemultiens (2,0)(Add((1,1), Add((2,3), VIDE))) = Add ((1, 1), VIDE)
+
+Realisation :
+Equations récursives :
+Terminaison :
+implantation : *)
+let rec supprimemultiens ((e1,occ1):'e multielt) (ens:'e multiens):'e multiens =
+  match ens with
+    | VIDE -> VIDE
+    | Add((e2,occ2), subseq) when e1=e2 & ( (occ1 = 0) || (occ1>=occ2) ) -> subseq
+    | Add((e2,occ2), subseq) when e1=e2 -> Add((e1,occ2 - occ1), subseq)
+    | Add(e,subseq) -> Add(e,supprimemultiens(e1,occ1)(subseq));;
+
+
+
