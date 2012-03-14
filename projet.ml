@@ -251,5 +251,14 @@ let rec supprimemultiens ((e1,occ1):'e multielt) (ens:'e multiens):'e multiens =
     | Add((e2,occ2), subseq) when e1=e2 -> Add((e1,occ2 - occ1), subseq)
     | Add(e,subseq) -> Add(e,supprimemultiens(e1,occ1)(subseq));;
 
+(*
+profil: egauxmultiens: ’e multiens  -> ’e multiens -> bool 
+semantique: egauxmultiens (ens1) (ens2) est vrai si les deux multi-ensembles sont égaux.
+exemples: (1) egauxmultiens (Add((1,2),VIDE)) (Add((1,2),VIDE)) = true
+          (2) egauxmultiens (Add((1,2),VIDE)) (Add((1,2),Add((2,1),VIDE))) = false
+
+implantation : *)
+let egauxmultiens (ens1:'e multiens) (ens2:'e multiens): bool =
+  inclusmultiens ens1 ens2 && inclusmultiens ens2 ens1;;
 
 
