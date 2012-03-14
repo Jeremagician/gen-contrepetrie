@@ -11,11 +11,11 @@ PARTIE I - Ensembles
 Il s'agit ici d'un type dit "polymorphe"
 qui ne prend pas de type particulier,
 Mais l'ensembles des elements doivent 
-êtres du même type
+Ãªtres du mÃªme type
 *)
 type 'e ensemble = NIL | Cons of 'e * 'e ensemble;;
 
-(* On définit l'enemblevide égal à NIL *)
+(* On dÃ©finit l'enemblevide Ã©gal Ã  NIL *)
 let ensemblevide = NIL;;
 
 (* Temporary for quick dev *)
@@ -35,7 +35,7 @@ let estvide (e: 'e ensemble) : bool = e = ensemblevide;;
 
 (* Specification : 
    Profil : cardinal : 'e ensemble -> int
-   Semantique : cardinal(e) renvoie le nombre d'élément (cardinal) 
+   Semantique : cardinal(e) renvoie le nombre d'Ã©lÃ©ment (cardinal) 
    de l'ensemble e
    Exemples : (1) cardinal(NIL) = 0
               (2) cardinal(Cons(42, NIL)) = 1
@@ -57,7 +57,7 @@ let rec cardinal(e: 'e ensemble) : int = match e with
 
    Realisation : *
    
-   Equation récursives :
+   Equation rÃ©cursives :
 
    Terminaison
 
@@ -89,7 +89,7 @@ let rec inclus (e1 : 'e ensemble)(e2 : 'e ensemble) : bool =
 
 (* Specification : 
    Profil : ajoute : 'e -> 'e ensemble -> 'e ensemble
-   Semantique : ajoute 'e ('e ensemble) ajoute l'élément 'e à l'ensemble 'e ensemble
+   Semantique : ajoute 'e ('e ensemble) ajoute l'Ã©lÃ©ment 'e Ã  l'ensemble 'e ensemble
    Exemples : (1) ajoute 1 NIL = Cons(1,NIL)
               (2) ajoute 5 Cons(6,NIL) = Cons(5, Cons(6, NIL))
 
@@ -99,7 +99,7 @@ let ajoute (e : 'e) (ens : 'e ensemble): 'e ensemble = Cons(e, ens);;
 
 (* Specification : 
    Profil : supprime : 'e -> 'e ensemble -> 'e ensemble
-   Semantique : supprime e ens supprime l'élément e de l'ensemble ens si celui ci
+   Semantique : supprime e ens supprime l'Ã©lÃ©ment e de l'ensemble ens si celui ci
    appartient 
    Exemples : (1) supprime 1 Cons(2, NIL) = Cons(2, NIL)
               (2) supprime 1 Cons(2,Cons(1, Cons(0, NIL))) = Cons(2, Cons(0,NIL))
@@ -117,7 +117,7 @@ let rec supprime (e : 'e)(ens : 'e ensemble) : 'e ensemble =
 
 (* Specification : 
    Profil : egaux : 'e ensemble -> 'e ensemble -> bool
-   Semantique : egaux(e1) (e2) renvoie true si e1 est égal à e2
+   Semantique : egaux(e1) (e2) renvoie true si e1 est Ã©gal Ã  e2
                 false sinon
    Exemples : (1) egaux Cons(1, Cons(2, NIL)) Cons(2, Cons(1, NIL)) = true
               (2) egaux Cons(1,Cons(2, NIL)) Cons(1, NIL) = false
@@ -133,7 +133,7 @@ let egaux (e1: 'e ensemble)(e2 : 'e ensemble) : bool = inclus e1 e2 && inclus e2
 
    Realisation : 
    
-   Equations récursives :
+   Equations rÃ©cursives :
    Terminaison :
    implantation : *)
 let rec intersection (e1 : 'e ensemble)(e2 : 'e ensemble) : 'e ensemble =
@@ -149,7 +149,7 @@ let rec intersection (e1 : 'e ensemble)(e2 : 'e ensemble) : 'e ensemble =
 
    Realisation : 
    
-   Equations récursives :
+   Equations rÃ©cursives :
    Terminaison :
    implantation : *)
 let rec difference (e1 : 'e ensemble)(e2 : 'e ensemble) : 'e ensemble = 
@@ -158,8 +158,8 @@ let rec difference (e1 : 'e ensemble)(e2 : 'e ensemble) : 'e ensemble =
     | Cons(elem, ens) when appartient elem e2 -> difference ens e2
     | Cons(elem, ens) -> Cons(elem, difference ens e2);;
 
-(* FIXME: ComplexitÃ© minimale ? autre solution ? *)
-(* On dÃ©finit une d'ajout d'ensembles pour faciliter la tache. *)
+(* FIXME: ComplexitÃƒÂ© minimale ? autre solution ? *)
+(* On dÃƒÂ©finit une d'ajout d'ensembles pour faciliter la tache. *)
 let rec ajoute_ensemble ( e1 : 'e ensemble) ( e2 : 'e ensemble) : 'e ensemble = 
   match e1 with
     | NIL -> e2
@@ -172,8 +172,8 @@ ajoute_ensemble (difference e1 e2)(difference e2 e1);;
 
 (* Type Multi Element sous la forme
    du couple (element polymorphe, Occurence)
-   on posera occurence différent de 0 car le multi
-   ensemble perdrait son intérêt ... *)
+   on posera occurence diffÃ©rent de 0 car le multi
+   ensemble perdrait son intÃ©rÃªt ... *)
 type 'e multielt = 'e * int;;
 
 type 'e multiens = VIDE | Add of 'e multielt * 'e multiens;;
@@ -201,7 +201,37 @@ let appartientmultiens (e :'e) ( ens : 'e multiens) : bool = occurencesmultiens 
 (* TODO: Question, les ensembles peuvent il etres inclus meme si 
 deux memes elements on un nombre different d'occurence ??? *)
 
+(*
+profil: inclusmultiens: â€™e multiens -> â€™e multiens -> bool 
+semantique: inclusmultiens (ens1) (ens2) renvoi true si le multi-ensemble ens1 est inclus dans le multi-ensemble ens2
+exemples:
+
+Realisation :
+Equations rÃ©cursives :
+Terminaison :
+implantation : *)
+
 let rec inclusmultiens (e1 : 'e multiens)(e2 : 'e multiens) : bool = 
   match e1 with
     | VIDE -> true
     | Add((el, count), subseq) -> appartientmultiens el e2 && inclusmultiens subseq e2;;
+
+(*
+profil: ajoutemultiens: â€™e mutielt  -> â€™e multiens -> â€™e multiens 
+
+semantique: ajoute une ou plusieurs occurences dâ€™Ã©lÃ¨ment Ã  un multi-ensemble.
+exemples: (1) ajoutemultiens (1,2)(Add((1,1), Add((2,3), VIDE))) = Add ((1, 3), Add ((2, 3), VIDE))
+          (2) ajoutemultiens (3,2)(Add((1,1), Add((2,3), VIDE))) = Add ((1, 1), Add ((2, 3), Add ((3, 2), VIDE)))
+
+Realisation :
+Equations rÃ©cursives :
+Terminaison :
+implantation : *)
+
+let rec ajoutemultiens ((e1,occ1):'e multielt) (ens:'e multiens): 'e multiens =
+	match ens with
+	| VIDE -> Add((e1,occ1), VIDE)
+	| Add((e2,occ2), subseq) when e1 = e2 -> Add((e1,occ1+occ2), subseq)
+	| Add(e,subseq) -> Add(e,ajoutemultiens(e1,occ1)(subseq));;
+
+ajoutemultiens (3,2)(Add((1,1), Add((2,3), VIDE)));;
