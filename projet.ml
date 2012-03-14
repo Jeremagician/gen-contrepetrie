@@ -183,7 +183,7 @@ type 'e multiens = VIDE | Add of 'e multielt * 'e multiens;;
 let multivide = VIDE;;
 
 (*
-profil: estvidemultiens: ’e multiens→ bool 
+profil: estvidemultiens: ’e multiens -> bool 
 semantique: estvidemultiens (ens1) est vrai si le multi-ensemble ens1 est vide.
 exemples: (1) estvidemultiens (VIDE) = true
           (2) estvidemultiens (Add((1,1),VIDE) = false
@@ -192,7 +192,7 @@ implantation : *)
 let estvidemultiens (ens : 'e multiens) : bool = ens = VIDE;;
 
 (*
-profil: cardinalmultiens:: ’e multiens→ int∗int 
+profil: cardinalmultiens:: ’e multiens -> int∗int 
 semantique:  retourne le couple (nombre de multi-éléments, nombre total d’occurences d'éléments).
 exemples: cardinalmultiens (Add((1,2), Add((2,3), VIDE)) = (2,5)
           cardinalmultiens (VIDE) = (0,0)
@@ -208,12 +208,30 @@ let rec cardinalmultiens (ens : 'e multiens) : int * int =
     | Add((elem,count) , subens) -> let (a,b) = cardinalmultiens (subens)
       in (a+1, b+count);;
 
+(*
+profil: occurencesmultiens: ’e -> ’e multiens -> int 
+semantique:  calcule le nombre d’occurences d’un élément dans un multi-ensemble.
+exemples: occurencesmultiens (2) (Add((1,5), Add((2,2), VIDE)) = 2
+          occurencesmultiens (3) (Add((1,5), Add((2,2), VIDE)) = 0
+
+
+Realisation :
+Equations récursives :
+Terminaison :
+implantation : *)
 let rec occurencesmultiens (e : 'e) (ens : 'e multiens) : int =
     match ens with
       | VIDE -> 0
       | Add((el,count),_) when el = e -> count
       | Add(_,subseq) -> occurencesmultiens e subseq;;
 
+(*
+profil: appartientmultiens: ’e -> ’e multiens -> bool 
+semantique:  teste l’appartenance d’un élément à un multi-ensemble.
+exemples: occurencesmultiens (2) (Add((1,5), Add((2,2), VIDE)) = true
+          occurencesmultiens (3) (Add((1,5), Add((2,2), VIDE)) = false
+
+implantation : *)
 let appartientmultiens (e :'e) ( ens : 'e multiens) : bool = occurencesmultiens e ens > 0;;
 
 (* TODO: Question, les ensembles peuvent il etres inclus meme si 
@@ -327,6 +345,8 @@ Realisation :
 Equations récursives :
 Terminaison :
 implantation : *)
+(* /!\ Cette fonction n'est pas correct /!\ *)
+
 let rec differencemultiens (ens1:'e multiens) (ens2:'e multiens):'e multiens =
   match ens1 with
     | VIDE -> ens2
