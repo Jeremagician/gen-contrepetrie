@@ -42,6 +42,11 @@ let estvide (e: 'e ensemble) : bool = e = ensemblevide;;
               (3) cardinal(Cons(1, Cons(2,NIL))) = 2
 
    Realisation : 
+   Equations Recursives :
+    cardinal NIL = 0
+    cardinal Cons(element, sousensemble) = 1 + cardinal sousensemble
+    
+   terminaison :
    implantation : *)
 let rec cardinal(e: 'e ensemble) : int = match e with
   | NIL -> 0
@@ -57,9 +62,11 @@ let rec cardinal(e: 'e ensemble) : int = match e with
 
    Realisation : *
    
-   Equation récursives :
-
-   Terminaison
+   Equations récursives :
+      appartient (element)(NIL) = false
+      appartient (element)(Cons(el, subseq)) = el = element || appartient element subseq
+    
+   Terminaison :
 
    implantation : *)
 
@@ -79,6 +86,8 @@ let rec appartient (e: 'e) (ens: 'e ensemble) : bool =
    Realisation :
    
    Equation recursive :
+      inclus (NIL) (ensemble) = true
+      inclus (Cons(element, sousensemble) = appartient element ensemble && inclus sousensemble ensemble
    Terminaison : 
    implantation : *)
 
@@ -106,6 +115,14 @@ let ajoute (e : 'e) (ens : 'e ensemble): 'e ensemble = Cons(e, ens);;
    Realisation : 
    
    Equation recursives :
+      supprime (element) (NIL) = NIL
+      supprime (element)(Cons(elem, sousensemble)) = 
+      sousensemble
+      si element = elem
+      
+        Cons(elem, supprime element sousensemble)
+      sinon
+        
    Terminaison :
 
    implantation : *)
@@ -134,6 +151,14 @@ let egaux (e1: 'e ensemble)(e2 : 'e ensemble) : bool = inclus e1 e2 && inclus e2
    Realisation : 
    
    Equations récursives :
+    intersection NIL ensemble = NIL
+    intersection Cons(elem, sousensemble)) ensemble = 
+      Cons(elem, intersection sousensemble ensemble)
+      si appartient elem ensemble revoie true
+      
+      intersection ens e2
+      sinon
+      
    Terminaison :
    implantation : *)
 let rec intersection (e1 : 'e ensemble)(e2 : 'e ensemble) : 'e ensemble =
@@ -150,6 +175,16 @@ let rec intersection (e1 : 'e ensemble)(e2 : 'e ensemble) : 'e ensemble =
    Realisation : 
    
    Equations récursives :
+   
+    difference NIL ensemble = NIL
+    difference Cons(elem, sousensemble)) ensemble = 
+      difference sousensemble ensemble
+      si appartient elem ensemble revoie true
+      
+      Cons(elem, difference sousensemble ensemble)
+      sinon
+
+   
    Terminaison :
    implantation : *)
 let rec difference (e1 : 'e ensemble)(e2 : 'e ensemble) : 'e ensemble = 
@@ -158,15 +193,32 @@ let rec difference (e1 : 'e ensemble)(e2 : 'e ensemble) : 'e ensemble =
     | Cons(elem, ens) when appartient elem e2 -> difference ens e2
     | Cons(elem, ens) -> Cons(elem, difference ens e2);;
 
-(* FIXME: ComplexitÃ© minimale ? autre solution ? *)
-(* On dÃ©finit une d'ajout d'ensembles pour faciliter la tache. *)
-let rec ajoute_ensemble ( e1 : 'e ensemble) ( e2 : 'e ensemble) : 'e ensemble = 
+
+(* On définit une fonction d'ajout d'ensembles pour faciliter la tache. *)
+(* Specification : 
+   Profil : union : 'e ensemble -> 'e ensemble -> 'e ensemble
+   Semantique : union e1 e2 renvoie l'union des ensembles e1 et e2
+   Exemples : (1) union Cons(1, Cons(2, NIL)) Cons(3, Cons(2, NIL)) = Cons(1,Cons(2,Cons(3,NIL)))
+
+   Realisation : 
+   
+   Equations récursives :
+   
+    union NIL ensemble = ensemble
+    union Cons(elem, sousensemble)) ensemble = Cons(elem, union sousensemble ensemble)
+    
+   Terminaison :
+   implantation : *)
+
+(* Revoir union pour eviter les doublons *)
+
+let rec union ( e1 : 'e ensemble) ( e2 : 'e ensemble) : 'e ensemble = 
   match e1 with
     | NIL -> e2
-    | Cons(e, seq) -> Cons(e, ajoute_ensemble(seq)(e2));;
+    | Cons(e, seq) -> Cons(e, union(seq)(e2));;
 
 let differencesymetrique ( e1 : 'e ensemble) ( e2 : 'e ensemble) : 'e ensemble = 
-ajoute_ensemble (difference e1 e2)(difference e2 e1);;
+union (difference e1 e2)(difference e2 e1);;
 
 (* Partie 2 : Multi Elements et Multi Ensembles *)
 
