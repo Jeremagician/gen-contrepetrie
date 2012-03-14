@@ -262,3 +262,17 @@ let egauxmultiens (ens1:'e multiens) (ens2:'e multiens): bool =
   inclusmultiens ens1 ens2 && inclusmultiens ens2 ens1;;
 
 
+(*
+profil: unionmultiens: ’e multiens -> ’e multiens -> ’e multiens.
+semantique: calcule l’union de deux multi-ensembles.
+exemples: (1) unionmultiens (Add((1,2),VIDE)) (Add((1,2),Add((2,1),VIDE))) = Add ((1, 4), Add ((2, 1), VIDE))
+          (2) unionmultiens (Add((1,2),VIDE)) (Add((3,1),VIDE)) =  Add ((3, 1), Add ((1, 2), VIDE))
+
+Realisation :
+Equations récursives :
+Terminaison :
+implantation : *)
+let rec unionmultiens (ens1:'e multiens) (ens2:'e multiens):'e multiens =
+  match ens1 with
+    | VIDE -> ens2
+    | Add(e, subseq) -> unionmultiens(subseq)(ajoutemultiens e ens2);;
