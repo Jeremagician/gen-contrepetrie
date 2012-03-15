@@ -268,7 +268,11 @@ exemples: occurencesmultiens (2) (Add((1,5), Add((2,2), VIDE)) = 2
 
 
 Realisation :
+
 Equations récursives :
+occurencemultiens (element) (VIDE) = 0
+occurencemultiens (element) (Add((e1,count), subseq)) = count si e1 = element occurencemultiens (element) (subseq) sinon
+
 Terminaison :
 implantation : *)
 let rec occurencesmultiens (e : 'e) (ens : 'e multiens) : int =
@@ -295,7 +299,11 @@ semantique: inclusmultiens (ens1) (ens2) renvoi true si le multi-ensemble ens1 e
 exemples:
 
 Realisation :
+
 Equations récursives :
+inclusmultiens (VIDE) (enssemble2) = true
+inclusmultiens (Add((el, count), subseq)) = appartientmultiens (enssemble1) (enssemble2)
+
 Terminaison :
 implantation : *)
 
@@ -313,6 +321,9 @@ exemples: (1) ajoutemultiens (1,2)(Add((1,1), Add((2,3), VIDE))) = Add ((1, 3), 
 
 Realisation :
 Equations récursives :
+ajoutemultiens ((e1,occ1)) (VIDE) = Add((e1,occ1),VIDE) 
+ajoutemultiens ((e1,occ1)) (Add((e2,occ2), subseq)) = Add((e1,occ1+occ2), subseq) si e1 = e2 Add(e,ajoutemultiens(e1,occ1)(subseq)) sinon
+
 Terminaison :
 implantation : *)
 let rec ajoutemultiens ((e1,occ1):'e multielt) (ens:'e multiens): 'e multiens =
@@ -329,7 +340,13 @@ exemples: (1) supprimemultiens (3,2)(Add((1,1), Add((2,3), VIDE))) = Add((1,1), 
           (3) supprimemultiens (2,0)(Add((1,1), Add((2,3), VIDE))) = Add ((1, 1), VIDE)
 
 Realisation :
+
 Equations récursives :
+supprimemultiens (element) (VIDE) = VIDE
+supprimemultiens ((e1,occ1)) (Add((e2,occ2), subseq)) =  subseq si e1 = e2 et occ1 = 0 ou si e1 = e2 et occ1>=occ2
+                                                         Add((e1,occ2 - occ1), subseq) si e1 = e2
+                                                         Add((e1,occ1),supprimemultiens(e1,occ1)(subseq)) sinon
+
 Terminaison :
 implantation : *)
 let rec supprimemultiens ((e1,occ1):'e multielt) (ens:'e multiens):'e multiens =
@@ -357,7 +374,11 @@ exemples: (1) unionmultiens (Add((1,2),VIDE)) (Add((1,2),Add((2,1),VIDE))) = Add
           (2) unionmultiens (Add((1,2),VIDE)) (Add((3,1),VIDE)) =  Add ((3, 1), Add ((1, 2), VIDE))
 
 Realisation :
+
 Equations récursives :
+unionmultiens (VIDE) (enssemble2) = VIDE
+unionmultiens (Add(e, subseq)) (enssemble2) = unionmultiens(subseq) (ajoutemultiens e ens2)
+
 Terminaison :
 implantation : *)
 let rec unionmultiens (ens1:'e multiens) (ens2:'e multiens):'e multiens =
@@ -373,6 +394,11 @@ exemples: (1) intersectionmultiens (Add((1,2),Add((2,1),VIDE))) (Add((2,1),VIDE)
 
 Realisation :
 Equations récursives :
+intersectionmultiens (VIDE) (enssemble2) = VIDE
+intersection (Add((e1,occ1), subseq)) (ens2) = Add((e1,occ1), intersectionmultiens (subseq) (ens2))  si e1 appartien à ens2 et si l'occurence de l'element e1 est plus faible dans le premier enssemble que dans le second
+                                               Add((e1,occ2), intersectionmutiens (subseq) (ens2)) si e1 appartient à ens2 et si l'occurence de l'element e1 est plus forte dans le premier enssemble que dans le second
+                                               intersectionmultiens (subseq) (ens2) sinon
+
 Terminaison :
 implantation : *)
 let rec intersectionmultiens (ens1:'e multiens) (ens2:'e multiens):'e multiens =
