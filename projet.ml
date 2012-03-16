@@ -1,5 +1,7 @@
-(* Projet INF121 : Ensemble, Multi-ensembles & Contrepets
-
+(*
+-----------------------------------------------------------
+#  Projet INF121 : Ensemble, Multi-ensembles & Contrepets #
+-----------------------------------------------------------
            ENJOLRAS Clement - DERDAELE Jeremy
 
 
@@ -32,6 +34,14 @@ let ensemblevide = NIL;;
    implantation : *)
 let estvide (e: 'e ensemble) : bool = e = ensemblevide;;
 
+(*--------------
+     Tests
+---------------*)
+estvide(NIL);; 
+(* - : bool = true *)
+
+estvide(Cons(42, NIL));; 
+(* - : bool = false *)
 
 (* Specification : 
    Profil : cardinal : 'e ensemble -> int
@@ -48,10 +58,22 @@ let estvide (e: 'e ensemble) : bool = e = ensemblevide;;
     
    terminaison :
    implantation : *)
+
 let rec cardinal(e: 'e ensemble) : int = match e with
   | NIL -> 0
   | Cons(_, seq) -> 1 + cardinal(seq);;
 
+(*--------------
+     Tests
+---------------*)
+cardinal(NIL);; 
+(* int = 0 *)
+
+cardinal(Cons(42, NIL));; 
+(* int = 1 *)
+
+cardinal(Cons(1, Cons(2, NIL)));; 
+(* int = 2 *)
 
 (* Specification : 
    Profil : appartient : 'e -> 'e ensemble -> bool
@@ -75,6 +97,15 @@ let rec appartient (e: 'e) (ens: 'e ensemble) : bool =
     | NIL -> false
     | Cons(a, subseq) -> a = e || appartient e subseq;;
 
+(*--------------
+     Tests
+---------------*)
+
+appartient (256)(Cons(42, Cons(255, NIL)));; 
+(* bool = false *)
+
+appartient (42) (Cons(42, NIL));; 
+(* bool = true *)
 
 (* Specification : 
    Profil : inclus : 'e ensemble -> 'e ensemble -> bool
@@ -96,6 +127,16 @@ let rec inclus (e1 : 'e ensemble)(e2 : 'e ensemble) : bool =
     | NIL -> true
     | Cons(e, ens) -> appartient e e2 && inclus ens e2;;
 
+(*--------------
+     Tests
+---------------*)
+
+inclus(Cons(1,Cons(2,NIL)))(Cons(1,Cons(2,Cons(3,NIL))));; 
+(* bool = true *)
+
+inclus(Cons(42, NIL))(Cons(41,Cons(43,NIL)));; 
+(* bool = false *)
+
 (* Specification : 
    Profil : ajoute : 'e -> 'e ensemble -> 'e ensemble
    Semantique : ajoute 'e ('e ensemble) ajoute l'élément 'e à l'ensemble 'e ensemble
@@ -106,12 +147,22 @@ let rec inclus (e1 : 'e ensemble)(e2 : 'e ensemble) : bool =
    implantation : *)
 let ajoute (e : 'e) (ens : 'e ensemble): 'e ensemble = Cons(e, ens);;
 
+(*--------------
+     Tests
+---------------*)
+
+ajoute 1 NIL;;
+(* - : int ensemble = Cons (1, NIL) *)
+
+ajoute 5 (Cons(6,NIL));; 
+(* - : int ensemble = Cons (5, Cons (6, NIL)) *)
+
 (* Specification : 
    Profil : supprime : 'e -> 'e ensemble -> 'e ensemble
    Semantique : supprime e ens supprime l'élément e de l'ensemble ens si celui ci
    appartient 
-   Exemples : (1) supprime 1 Cons(2, NIL) = Cons(2, NIL)
-              (2) supprime 1 Cons(2,Cons(1, Cons(0, NIL))) = Cons(2, Cons(0,NIL))
+   Exemples : (1) supprime 1 (Cons(2, NIL)) = Cons(2, NIL)
+              (2) supprime 1 (Cons(2,Cons(1, Cons(0, NIL)))) = Cons(2, Cons(0,NIL))
    Realisation : 
    
    Equation recursives :
@@ -132,21 +183,40 @@ let rec supprime (e : 'e)(ens : 'e ensemble) : 'e ensemble =
     | Cons(elem, sousEnsemble) when e = elem -> sousEnsemble
     | Cons(elem, sousEnsemble) -> Cons(elem, supprime e sousEnsemble);;
 
+(*--------------
+     Tests
+---------------*)
+supprime 1 (Cons(2, NIL));; 
+(* - : int ensemble = Cons (2, NIL) *)
+
+supprime 1 (Cons(2,Cons(1, Cons(0, NIL))));; 
+(* - : int ensemble = Cons (2, Cons (0, NIL)) *)
+
 (* Specification : 
    Profil : egaux : 'e ensemble -> 'e ensemble -> bool
    Semantique : egaux(e1) (e2) renvoie true si e1 est égal à e2
                 false sinon
-   Exemples : (1) egaux Cons(1, Cons(2, NIL)) Cons(2, Cons(1, NIL)) = true
-              (2) egaux Cons(1,Cons(2, NIL)) Cons(1, NIL) = false
+   Exemples : (1) egaux (Cons(1, Cons(2, NIL))) (Cons(2, Cons(1, NIL))) = true
+              (2) egaux (Cons(1,Cons(2, NIL))) (Cons(1, NIL)) = false
 
    Realisation : 
    implantation : *)
 let egaux (e1: 'e ensemble)(e2 : 'e ensemble) : bool = inclus e1 e2 && inclus e2 e1;;
 
+(*--------------
+     Tests
+---------------*)
+
+egaux (Cons(1, Cons(2, NIL))) (Cons(2, Cons(1, NIL)));;
+(* - : bool = true *)
+
+egaux (Cons(1,Cons(2, NIL))) (Cons(1, NIL));;
+(* - : bool = false *)
+
 (* Specification : 
    Profil : intersection : 'e ensemble -> 'e ensemble -> 'e ensemble
    Semantique : intersection e1 e2 renvoie l'intersection des ensembles e1 et e2
-   Exemples : (1) intersection Cons(1, Cons(2, NIL)) Cons(3, Cons(2, NIL)) = Cons(2,NIL)
+   Exemples : (1) intersection (Cons(1, Cons(2, NIL))) (Cons(3, Cons(2, NIL))) = Cons(2,NIL)
 
    Realisation : 
    
@@ -167,10 +237,18 @@ let rec intersection (e1 : 'e ensemble)(e2 : 'e ensemble) : 'e ensemble =
     | Cons(elem, sousEnsemble) when appartient elem e2 -> Cons(elem, intersection sousEnsemble e2)
     | Cons(elem, ens) -> intersection ens e2;;
 
+(*--------------
+     Tests
+---------------*)
+
+intersection (Cons(1, Cons(2, NIL))) (Cons(3, Cons(2, NIL)));;
+(* - : int ensemble = Cons (2, NIL) *)
+
+
 (* Specification : 
    Profil : difference : 'e ensemble -> 'e ensemble -> 'e ensemble
    Semantique : difference intersection e1 e2 renvoie la difference des ensembles e1 et e2
-   Exemples : (1) intersection Cons(1, Cons(2, NIL)) Cons(3, Cons(2, NIL)) = Cons(1,NIL)
+   Exemples : (1) difference (Cons(1, Cons(2, NIL))) (Cons(3, Cons(2, NIL))) = Cons(1,NIL)
 
    Realisation : 
    
@@ -193,6 +271,13 @@ let rec difference (e1 : 'e ensemble)(e2 : 'e ensemble) : 'e ensemble =
     | Cons(elem, ens) when appartient elem e2 -> difference ens e2
     | Cons(elem, ens) -> Cons(elem, difference ens e2);;
 
+(*--------------
+     Tests
+---------------*)
+
+difference (Cons(1, Cons(2, NIL))) (Cons(3, Cons(2, NIL)));;
+
+(* - : int ensemble = Cons (1, NIL) *)
 
 (* On définit une fonction d'ajout d'ensembles pour faciliter la tache. *)
 (* Specification : 
@@ -243,10 +328,19 @@ exemples: (1) estvidemultiens (VIDE) = true
 implantation : *)
 let estvidemultiens (ens : 'e multiens) : bool = ens = VIDE;;
 
+(*--------------
+     Tests
+---------------*)
+estvidemultiens(VIDE);;
+(* - : bool = true *)
+
+estvidemultiens(Add((1,1),VIDE));;
+(* - : bool = false *)
+
 (*
 profil: cardinalmultiens:: ’e multiens -> int∗int 
 semantique:  retourne le couple (nombre de multi-éléments, nombre total d’occurences d'éléments).
-exemples: cardinalmultiens (Add((1,2), Add((2,3), VIDE)) = (2,5)
+exemples: cardinalmultiens (Add((1,2), Add((2,3), VIDE))) = (2,5)
           cardinalmultiens (VIDE) = (0,0)
 
 
@@ -260,12 +354,20 @@ let rec cardinalmultiens (ens : 'e multiens) : int * int =
     | Add((elem,count) , subens) -> let (a,b) = cardinalmultiens (subens)
       in (a+1, b+count);;
 
+(*--------------
+     Tests
+---------------*)
+cardinalmultiens (Add((1,2), Add((2,3), VIDE)));;
+(* - : int * int = (2, 5) *)
+
+cardinalmultiens (VIDE);;
+(* - : int * int = (0, 0) *)
+
 (*
 profil: occurencesmultiens: ’e -> ’e multiens -> int 
 semantique:  calcule le nombre d’occurences d’un élément dans un multi-ensemble.
-exemples: occurencesmultiens (2) (Add((1,5), Add((2,2), VIDE)) = 2
-          occurencesmultiens (3) (Add((1,5), Add((2,2), VIDE)) = 0
-
+exemples: occurencesmultiens (2) (Add((1,5), Add((2,2), VIDE))) = 2
+          occurencesmultiens (3) (Add((1,5), Add((2,2), VIDE))) = 0
 
 Realisation :
 
@@ -281,14 +383,33 @@ let rec occurencesmultiens (e : 'e) (ens : 'e multiens) : int =
       | Add((el,count),_) when el = e -> count
       | Add(_,subseq) -> occurencesmultiens e subseq;;
 
+(*--------------
+     Tests
+---------------*)
+occurencesmultiens (2) (Add((1,5), Add((2,2), VIDE)));; 
+(* - : int = 2 *)
+
+occurencesmultiens (3) (Add((1,5), Add((2,2), VIDE)));;
+(* - : int = 0 *)
+
 (*
 profil: appartientmultiens: ’e -> ’e multiens -> bool 
 semantique:  teste l’appartenance d’un élément à un multi-ensemble.
-exemples: occurencesmultiens (2) (Add((1,5), Add((2,2), VIDE)) = true
-          occurencesmultiens (3) (Add((1,5), Add((2,2), VIDE)) = false
+exemples: occurencesmultiens (2) (Add((1,5), Add((2,2), VIDE))) = true
+          occurencesmultiens (3) (Add((1,5), Add((2,2), VIDE))) = false
 
 implantation : *)
 let appartientmultiens (e :'e) ( ens : 'e multiens) : bool = occurencesmultiens e ens > 0;;
+
+(*--------------
+     Tests
+---------------*)
+
+appartientmultiens (2) (Add((1,5), Add((2,2), VIDE)));;
+(* - : bool = true *)
+
+appartientmultiens (3) (Add((1,5), Add((2,2), VIDE)));;
+(* - : bool = false *)
 
 (* TODO: Question, les ensembles peuvent il etres inclus meme si 
 deux memes elements on un nombre different d'occurence ??? *)
@@ -312,6 +433,11 @@ let rec inclusmultiens (e1 : 'e multiens)(e2 : 'e multiens) : bool =
     | VIDE -> true
     | Add((el, count), subseq) -> appartientmultiens el e2 && inclusmultiens subseq e2;;
 
+(*--------------
+     Tests
+---------------*)
+
+
 (*
 profil: ajoutemultiens: ’e mutielt  -> ’e multiens -> ’e multiens 
 
@@ -331,6 +457,16 @@ let rec ajoutemultiens ((e1,occ1):'e multielt) (ens:'e multiens): 'e multiens =
     | VIDE -> Add((e1,occ1), VIDE)
     | Add((e2,occ2), subseq) when e1 = e2 -> Add((e1,occ1+occ2), subseq)
     | Add(e,subseq) -> Add(e,ajoutemultiens(e1,occ1)(subseq));;
+
+(*--------------
+     Tests
+---------------*)
+
+ajoutemultiens (1,2)(Add((1,1), Add((2,3), VIDE)));; 
+(* - : int multiens = Add ((1, 3), Add ((2, 3), VIDE)) *)
+
+ajoutemultiens (3,2)(Add((1,1), Add((2,3), VIDE)));;
+(* - : int multiens = Add ((1, 1), Add ((2, 3), Add ((3, 2), VIDE))) *)
 
 (*
 profil: supprimemultiens: ’e multielt  -> ’e multiens -> ’e multiens 
@@ -356,6 +492,19 @@ let rec supprimemultiens ((e1,occ1):'e multielt) (ens:'e multiens):'e multiens =
     | Add((e2,occ2), subseq) when e1=e2 -> Add((e1,occ2 - occ1), subseq)
     | Add(e,subseq) -> Add(e,supprimemultiens(e1,occ1)(subseq));;
 
+(*--------------
+     Tests
+---------------*)
+
+supprimemultiens (3,2)(Add((1,1), Add((2,3), VIDE)));;
+(* - : int multiens = Add ((1, 1), Add ((2, 3), VIDE)) *)
+
+supprimemultiens (2,2)(Add((1,1), Add((2,3), VIDE)));;
+(* - : int multiens = Add ((1, 1), Add ((2, 1), VIDE)) *)
+
+supprimemultiens (2,0)(Add((1,1), Add((2,3), VIDE)));;
+(* - : int multiens = Add ((1, 1), VIDE) *)
+
 (*
 profil: egauxmultiens: ’e multiens  -> ’e multiens -> bool 
 semantique: egauxmultiens (ens1) (ens2) est vrai si les deux multi-ensembles sont égaux.
@@ -366,6 +515,14 @@ implantation : *)
 let egauxmultiens (ens1:'e multiens) (ens2:'e multiens): bool =
   inclusmultiens ens1 ens2 && inclusmultiens ens2 ens1;;
 
+(*--------------
+     Tests
+---------------*)
+egauxmultiens (Add((1,2),VIDE)) (Add((1,2),VIDE));;
+(* - : bool = true *)
+
+egauxmultiens (Add((1,2),VIDE)) (Add((1,2),Add((2,1),VIDE)));;
+(* - : bool = false *)
 
 (*
 profil: unionmultiens: ’e multiens -> ’e multiens -> ’e multiens.
@@ -386,6 +543,16 @@ let rec unionmultiens (ens1:'e multiens) (ens2:'e multiens):'e multiens =
     | VIDE -> ens2
     | Add(e, subseq) -> unionmultiens(subseq)(ajoutemultiens e ens2);;
 
+(*--------------
+     Tests
+---------------*)
+
+unionmultiens (Add((1,2),VIDE)) (Add((1,2),Add((2,1),VIDE)));;
+(* - : int multiens = Add ((1, 4), Add ((2, 1), VIDE)) *)
+
+unionmultiens (Add((1,2),VIDE)) (Add((3,1),VIDE));;
+(* - : int multiens = Add ((3, 1), Add ((1, 2), VIDE)) *)
+
 (*
 profil: intersectionmultiens: ’e multiens -> ’e multiens -> ’e multiens 
 semantique: calcule l’intersection de deux multi-ensembles.
@@ -395,8 +562,8 @@ exemples: (1) intersectionmultiens (Add((1,2),Add((2,1),VIDE))) (Add((2,1),VIDE)
 Realisation :
 Equations récursives :
 intersectionmultiens (VIDE) (enssemble2) = VIDE
-intersection (Add((e1,occ1), subseq)) (ens2) = Add((e1,occ1), intersectionmultiens (subseq) (ens2))  si e1 appartien à ens2 et si l'occurence de l'element e1 est plus faible dans le premier enssemble que dans le second
-                                               Add((e1,occ2), intersectionmutiens (subseq) (ens2)) si e1 appartient à ens2 et si l'occurence de l'element e1 est plus forte dans le premier enssemble que dans le second
+intersection (Add((e1,occ1), subseq)) (ens2) = Add((e1,occ1), intersectionmultiens (subseq) (ens2))  si e1 appartien à ens2 et si l'occurence de l'element e1 est plus faible dans le premier ensemble que dans le second
+                                               Add((e1,occ2), intersectionmutiens (subseq) (ens2)) si e1 appartient à ens2 et si l'occurence de l'element e1 est plus forte dans le premier ensemble que dans le second
                                                intersectionmultiens (subseq) (ens2) sinon
 
 Terminaison :
@@ -410,15 +577,24 @@ let rec intersectionmultiens (ens1:'e multiens) (ens2:'e multiens):'e multiens =
       	  if (occ1 <= occ2) then
 	    Add((e1,occ1), intersectionmultiens (subseq) (ens2))
 	  else
-	    Add((e1,occ2), intersectionmutiens (subseq) (ens2))
+	    Add((e1,occ2), intersectionmultiens (subseq) (ens2))
 
     | Add(_,subseq) ->  intersectionmultiens (subseq) (ens2);;
+
+(*--------------
+     Tests
+---------------*)
+intersectionmultiens (Add((1,2),Add((2,1),VIDE))) (Add((2,1),VIDE));;
+(* - : int multiens = Add ((2, 1), VIDE) *)
+
+intersectionmultiens (Add((1,3),Add((2,4),VIDE))) (Add((3,3),Add((2,2),VIDE)));;
+(* - : int multiens = Add ((2, 2), VIDE) *)
 
 (*
 profil: differencemultiens: ’e multiens -> ’e multiens -> ’e multiens 
 semantique: calcule la différence de deux multi-ensembles.
 exemples:
-
+  (1) 
 Realisation :
 Equations récursives :
 Terminaison :
@@ -432,7 +608,11 @@ let rec differencemultiens (ens1:'e multiens) (ens2:'e multiens):'e multiens =
         let occ2 = occurencesmultiens (e1) (ens2) in differencemultiens( supprimemultiens (e1,occ2) (ens1) ) (ens2) 
     | Add(elem,subseq) -> Add(elem, differencemultiens (subseq) (ens2));;
 
-differencemultiens (Add((1,4),Add((2,5),VIDE))) (Add((1,3),Add((2,2),VIDE)));;
+(*--------------
+     Tests
+---------------*)
+
+
 
 (*
 profil: differencesymetriquemultiens: ’e multiens -> ’e multiens -> ’e multiens
@@ -445,3 +625,6 @@ Terminaison :
 implantation : *)
 let differencesymetriquemultiens (ens1: 'e multiens) (ens2: 'e multiens) : 'e multiens =
   differencemultiens (unionmultiens(ens1) (ens2)) (intersectionmultiens (ens1) (ens2));;
+(*--------------
+     Tests
+---------------*)
