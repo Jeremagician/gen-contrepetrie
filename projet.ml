@@ -1,8 +1,9 @@
 (*
------------------------------------------------------------
+===========================================================
 #  Projet INF121 : Ensemble, Multi-ensembles & Contrepets #
 -----------------------------------------------------------
-           ENJOLRAS Clement - DERDAELE Jeremy
+#          ENJOLRAS Clement - DERDAELE Jeremy             #
+===========================================================
 
 
 PARTIE I - Ensembles 
@@ -57,6 +58,12 @@ estvide(Cons(42, NIL));;
     cardinal Cons(element, sousensemble) = 1 + cardinal sousensemble
     
    terminaison :
+    Soit la fonction mesure ( ens ) = Nombre d'éléments de l'ensemble ens
+    Profil mesure : 'e ensemble -> int
+    On a mesure ( Cons(e,sousens) )  = Nombre d'éléments de (e,sousens)
+                               > mesure ( sousens) = 1 + nombre d'éléments de sousens
+    Ainsi mesure est une fonction décroissante et minorée par 0
+    La fonction termine bien.
    implantation : *)
 
 let rec cardinal(e: 'e ensemble) : int = match e with
@@ -89,7 +96,12 @@ cardinal(Cons(1, Cons(2, NIL)));;
       appartient (element)(Cons(el, subseq)) = el = element || appartient element subseq
     
    Terminaison :
-
+    Soit la fonction mesure ( ens ) = Nombre d'éléments de l'ensemble ens
+    Profil mesure : 'e ensemble -> int
+    On a mesure ( Cons(e,sousens) )  = Nombre d'éléments de (e,sousens)
+                               > mesure ( sousens) = 1 + nombre d'éléments de sousens
+    Ainsi mesure est une fonction décroissante et minorée par 0
+    La fonction termine bien.
    implantation : *)
 
 let rec appartient (e: 'e) (ens: 'e ensemble) : bool = 
@@ -120,6 +132,13 @@ appartient (42) (Cons(42, NIL));;
       inclus (NIL) (ensemble) = true
       inclus (Cons(element, sousensemble) = appartient element ensemble && inclus sousensemble ensemble
    Terminaison : 
+        Soit la fonction mesure ( ens ) = Nombre d'éléments de l'ensemble ens
+        Profil mesure : 'e ensemble -> int
+        On a mesure ( Cons(e,sousens) )  = Nombre d'éléments de (e,sousens)
+                               > mesure ( sousens) = 1 + nombre d'éléments de sousens
+        Ainsi mesure est une fonction décroissante et minorée par 0.
+        On applique mesure a l'ensemble passé en premier paramètre.
+        La fonction termine bien.
    implantation : *)
 
 let rec inclus (e1 : 'e ensemble)(e2 : 'e ensemble) : bool =
@@ -175,7 +194,14 @@ ajoute 5 (Cons(6,NIL));;
       sinon
         
    Terminaison :
-
+      Soit la fonction mesure ( ens ) = Nombre d'éléments de l'ensemble ens
+      Profil mesure : 'e ensemble -> int
+      On a mesure ( Cons(e,sousens) )  = Nombre d'éléments de (e,sousens)
+                                       > mesure ( sousens) = 1 + nombre d'éléments de sousens
+      Ainsi mesure est une fonction décroissante et minorée par 0.
+      On applique mesure a l'ensemble passé en 2ème paramètre.
+      La fonction termine bien.
+      
    implantation : *)
 let rec supprime (e : 'e)(ens : 'e ensemble) : 'e ensemble =
   match ens with
@@ -230,7 +256,15 @@ egaux (Cons(1,Cons(2, NIL))) (Cons(1, NIL));;
       sinon
       
    Terminaison :
+        Soit la fonction mesure ( ens ) = Nombre d'éléments de l'ensemble ens
+        Profil mesure : 'e ensemble -> int
+        On a mesure ( Cons(e,sousens) )  = Nombre d'éléments de (e,sousens)
+                                         > mesure ( sousens) = 1 + nombre d'éléments de sousens
+        Ainsi mesure est une fonction décroissante et minorée par 0
+        On applique mesure au premier paramètre de 'intersection'
+        La fonction termine bien.
    implantation : *)
+   
 let rec intersection (e1 : 'e ensemble)(e2 : 'e ensemble) : 'e ensemble =
   match e1 with
     | NIL -> NIL
@@ -264,6 +298,14 @@ intersection (Cons(1, Cons(2, NIL))) (Cons(3, Cons(2, NIL)));;
 
    
    Terminaison :
+        Soit la fonction mesure ( ens ) = Nombre d'éléments de l'ensemble ens
+        Profil mesure : 'e ensemble -> int
+        On a mesure ( Cons(e,sousens) )  = Nombre d'éléments de (e,sousens)
+                                         > mesure ( sousens) = 1 + nombre d'éléments de sousens
+        Ainsi mesure est une fonction décroissante et minorée par 0.
+        On applique mesure au premier paramètre de la fonction.
+        La fonction termine bien.
+        
    implantation : *)
 let rec difference (e1 : 'e ensemble)(e2 : 'e ensemble) : 'e ensemble = 
   match e1 with
@@ -293,6 +335,13 @@ difference (Cons(1, Cons(2, NIL))) (Cons(3, Cons(2, NIL)));;
     union Cons(elem, sousensemble)) ensemble = Cons(elem, union sousensemble ensemble)
     
    Terminaison :
+      Soit la fonction mesure ( ens ) = Nombre d'éléments de l'ensemble ens
+      Profil mesure : 'e ensemble -> int
+      On a mesure ( Cons(e,sousens) )  = Nombre d'éléments de (e,sousens)
+                                       > mesure ( sousens) = 1 + nombre d'éléments de sousens
+      Ainsi mesure est une fonction décroissante et minorée par 0
+      On applique mesure au premier paramètre de 'union'
+      La fonction termine bien.
    implantation : *)
 
 (* Revoir union pour eviter les doublons *)
@@ -302,15 +351,30 @@ let rec union ( e1 : 'e ensemble) ( e2 : 'e ensemble) : 'e ensemble =
     | NIL -> e2
     | Cons(e, seq) -> Cons(e, union(seq)(e2));;
 
+(*--------------
+     Tests
+---------------*)
+
+(* Specification : 
+   Profil : differencesymetrique : 'e ensemble -> 'e ensemble -> 'e ensemble
+   Semantique : differencesymetrique e1 e2 renvoie la différence symétrique des 
+                ensembles e1 et e2
+   Exemples : (1) differencesymetrique (Cons(1,Cons(2, NIL))) (Cons(2,Cons(3, NIL))) = Cons(1,Cons(3, NIL))
+*)
+
 let differencesymetrique ( e1 : 'e ensemble) ( e2 : 'e ensemble) : 'e ensemble = 
 union (difference e1 e2)(difference e2 e1);;
+
+(*--------------
+     Tests
+---------------*)
 
 (* Partie 2 : Multi Elements et Multi Ensembles *)
 
 (* Type Multi Element sous la forme
    du couple (element polymorphe, Occurence)
    on posera occurence différent de 0 car le multi
-   ensemble perdrait son intérêt ... *)
+   ensemble perdrait alors son intérêt ... *)
 type 'e multielt = 'e * int;;
 
 type 'e multiens = VIDE | Add of 'e multielt * 'e multiens;;
@@ -346,7 +410,17 @@ exemples: cardinalmultiens (Add((1,2), Add((2,3), VIDE))) = (2,5)
 
 Realisation :
 Equations récursives :
+        cardinalmultiens (VIDE)  = (0,0)
+        cardinalmultiens( Add((elem, count), subens) ) = (a+1, b+count) (avec (a,b) = cardinalmultiens (subens)
 Terminaison :
+        Soit la fonction mesure ( multiens ) = Nombre de multi elements de l'ensemble (multiens)
+        Profil mesure : 'e multiens -> int
+        On a mesure ( Add((elem,count), subens))  = Nombre d'éléments de ((elem,count),subens)
+                                        > mesure ( subens) = 1 + nombre d'éléments de subens
+        Ainsi mesure est une fonction décroissante et minorée par 0.
+        On applique la fonction mesure a l'ensemble passé en paramètre de la fonction cardinalmultiens
+        La fonction termine bien.
+
 implantation : *)
 let rec cardinalmultiens (ens : 'e multiens) : int * int = 
   match ens with
@@ -376,7 +450,15 @@ occurencemultiens (element) (VIDE) = 0
 occurencemultiens (element) (Add((e1,count), subseq)) = count si e1 = element occurencemultiens (element) (subseq) sinon
 
 Terminaison :
+        Soit la fonction mesure ( multiens ) = Nombre de multi elements de l'ensemble (multiens)
+        Profil mesure : 'e multiens -> int
+        On a mesure ( Add((elem,count), subens))  = Nombre d'éléments de ((elem,count),subens)
+                                        > mesure ( subens) = 1 + nombre d'éléments de subens
+        Ainsi mesure est une fonction décroissante et minorée par 0
+        on applique la fonction mesure a l'ensemble passé en paramètre.
+        La fonction termine bien.
 implantation : *)
+
 let rec occurencesmultiens (e : 'e) (ens : 'e multiens) : int =
     match ens with
       | VIDE -> 0
@@ -411,9 +493,6 @@ appartientmultiens (2) (Add((1,5), Add((2,2), VIDE)));;
 appartientmultiens (3) (Add((1,5), Add((2,2), VIDE)));;
 (* - : bool = false *)
 
-(* TODO: Question, les ensembles peuvent il etres inclus meme si 
-deux memes elements on un nombre different d'occurence ??? *)
-
 (*
 profil: inclusmultiens: ’e multiens -> ’e multiens -> bool 
 semantique: inclusmultiens (ens1) (ens2) renvoi true si le multi-ensemble ens1 est inclus dans le multi-ensemble ens2
@@ -426,6 +505,13 @@ inclusmultiens (VIDE) (enssemble2) = true
 inclusmultiens (Add((el, count), subseq)) = appartientmultiens (enssemble1) (enssemble2)
 
 Terminaison :
+        Soit la fonction mesure ( multiens ) = Nombre de multi elements de l'ensemble (multiens)
+        Profil mesure : 'e multiens -> int
+        On a mesure ( Add((elem,count), subens))  = Nombre d'éléments de ((elem,count),subens)
+                                        > mesure ( subens) = 1 + nombre d'éléments de subens
+        Ainsi mesure est une fonction décroissante et minorée par 0.
+        On applique la fonction mesure au premier paramètre de la fonction.
+        La fonction termine bien.
 implantation : *)
 
 let rec inclusmultiens (e1 : 'e multiens)(e2 : 'e multiens) : bool = 
@@ -451,6 +537,13 @@ ajoutemultiens ((e1,occ1)) (VIDE) = Add((e1,occ1),VIDE)
 ajoutemultiens ((e1,occ1)) (Add((e2,occ2), subseq)) = Add((e1,occ1+occ2), subseq) si e1 = e2 Add(e,ajoutemultiens(e1,occ1)(subseq)) sinon
 
 Terminaison :
+        Soit la fonction mesure ( multiens ) = Nombre de multi elements de l'ensemble (multiens)
+        Profil mesure : 'e multiens -> int
+        On a mesure ( Add((elem,count), subens))  = Nombre d'éléments de ((elem,count),subens)
+                                        > mesure ( subens) = 1 + nombre d'éléments de subens
+        Ainsi mesure est une fonction décroissante et minorée par 0.
+        On applique la fonction mesure a l'ensemble passé en argument.
+        La fonction termine bien.
 implantation : *)
 let rec ajoutemultiens ((e1,occ1):'e multielt) (ens:'e multiens): 'e multiens =
   match ens with
@@ -484,6 +577,13 @@ supprimemultiens ((e1,occ1)) (Add((e2,occ2), subseq)) =  subseq si e1 = e2 et oc
                                                          Add((e1,occ1),supprimemultiens(e1,occ1)(subseq)) sinon
 
 Terminaison :
+        Soit la fonction mesure ( multiens ) = Nombre de multi elements de l'ensemble (multiens)
+        Profil mesure : 'e multiens -> int
+        On a mesure ( Add((elem,count), subens))  = Nombre d'éléments de ((elem,count),subens)
+                                        > mesure ( subens) = 1 + nombre d'éléments de subens
+        Ainsi mesure est une fonction décroissante et minorée par 0.
+        On applique mesure a l'ensemble passé en paramètre.
+        La fonction termine bien.
 implantation : *)
 let rec supprimemultiens ((e1,occ1):'e multielt) (ens:'e multiens):'e multiens =
   match ens with
@@ -537,6 +637,13 @@ unionmultiens (VIDE) (enssemble2) = VIDE
 unionmultiens (Add(e, subseq)) (enssemble2) = unionmultiens(subseq) (ajoutemultiens e ens2)
 
 Terminaison :
+        Soit la fonction mesure ( multiens ) = Nombre de multi elements de l'ensemble (multiens)
+        Profil mesure : 'e multiens -> int
+        On a mesure ( Add((elem,count), subens))  = Nombre d'éléments de ((elem,count),subens)
+                                        > mesure ( subens) = 1 + nombre d'éléments de subens
+        Ainsi mesure est une fonction décroissante et minorée par 0.
+        On applique mesure au premier paramètre de la fonction.
+        La fonction termine bien.
 implantation : *)
 let rec unionmultiens (ens1:'e multiens) (ens2:'e multiens):'e multiens =
   match ens1 with
@@ -567,6 +674,13 @@ intersection (Add((e1,occ1), subseq)) (ens2) = Add((e1,occ1), intersectionmultie
                                                intersectionmultiens (subseq) (ens2) sinon
 
 Terminaison :
+  Soit la fonction mesure ( multiens ) = Nombre de multi elements de l'ensemble (multiens)
+        Profil mesure : 'e multiens -> int
+        On a mesure ( Add((elem,count), subens))  = Nombre d'éléments de ((elem,count),subens)
+                                        > mesure ( subens) = 1 + nombre d'éléments de subens
+        Ainsi mesure est une fonction décroissante et minorée par 0.
+        On applique la fonction mesure au premier paramètre.
+        La fonction termine bien.
 implantation : *)
 let rec intersectionmultiens (ens1:'e multiens) (ens2:'e multiens):'e multiens =
   match ens1 with
@@ -620,8 +734,6 @@ semantique:  calcule la différence symétrique de deux multi-ensembles.
 exemples: (1) 
 
 Realisation :
-Equations récursives :
-Terminaison :
 implantation : *)
 let differencesymetriquemultiens (ens1: 'e multiens) (ens2: 'e multiens) : 'e multiens =
   differencemultiens (unionmultiens(ens1) (ens2)) (intersectionmultiens (ens1) (ens2));;
