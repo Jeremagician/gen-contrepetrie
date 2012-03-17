@@ -717,7 +717,7 @@ implantation : *)
 
 let rec differencemultiens (ens1:'e multiens) (ens2:'e multiens):'e multiens =
   match ens1 with
-    | VIDE -> ens2
+    | VIDE -> VIDE
     | Add((e1,occ1), subseq) when appartientmultiens (e1) (ens2) ->
         let occ2 = occurencesmultiens (e1) (ens2) in differencemultiens( supprimemultiens (e1,occ2) (ens1) ) (ens2) 
     | Add(elem,subseq) -> Add(elem, differencemultiens (subseq) (ens2));;
@@ -725,8 +725,7 @@ let rec differencemultiens (ens1:'e multiens) (ens2:'e multiens):'e multiens =
 (*--------------
      Tests
 ---------------*)
-
-
+differencemultiens (Add((1,1), Add((2,4)
 
 (*
 profil: differencesymetriquemultiens: ’e multiens -> ’e multiens -> ’e multiens
