@@ -21,9 +21,6 @@ type 'e ensemble = NIL | Cons of 'e * 'e ensemble;;
 (* On définit l'enemblevide égal à NIL *)
 let ensemblevide = NIL;;
 
-(* Temporary for quick dev *)
-#use "quickdev.ml";;
-
 (* Specification : 
    Profil : estvide : 'e ensemble -> bool
    Semantique : estvide(e) renvoie true si e est un
@@ -388,8 +385,6 @@ type 'e multielt = 'e * int;;
 
 type 'e multiens = VIDE | Add of 'e multielt * 'e multiens;;
 
-#use "quickdev.ml"
-
 let multivide = VIDE;;
 
 (*
@@ -734,6 +729,13 @@ differencemultiens VIDE ens2 = VIDE
 differencemultiens (Add((e1,occ1), subseq)) (ens2) = differencemultiens (l'enssemble 1 - (e1,occurence de e1 dans e2)) (ens2 sans e1), si e1 appartien a ens2
                                                      Add ((e1,occ1), differencemultiens (subseq) (ens2) sinon
 Terminaison :
+      Soit la fonction mesure ( multiens ) = Nombre de multi elements de l'ensemble (multiens)
+      Profil mesure : 'e multiens -> int
+      On a mesure ( Add((elem,count), subens))  = Nombre d'éléments de ((elem,count),subens)
+                                      > mesure ( subens) = 1 + nombre d'éléments de subens
+      Ainsi mesure est une fonction décroissante et minorée par 0.
+      On applique la fonction mesure au premier paramètre.
+      La fonction termine bien.
 implantation : *)
 
 let rec differencemultiens (ens1:'e multiens) (ens2:'e multiens):'e multiens =
@@ -753,32 +755,18 @@ differencemultiens (Add((3,4),Add((2,5),VIDE))) (Add((1,1),Add((2,4),VIDE)));;
 differencemultiens (Add((1,4),Add((2,3),VIDE))) (Add((1,1),Add((2,3),VIDE)));;
 (* int multiens =  Add ((1, 3), VIDE) *)
 
-
-
-
-
-let rec differencemultiens (ens1: 'e multiens) (ens2: 'e multiens) : 'e multiens =
-if egauxmultiens (ens1) (ens2) then VIDE
-else if inclusmultiens (ens2) (ens1) then match ens2 with 
-    |Add((a,b),Add(d,g)) -> if appartientmultiens (a) (ens1) then
-differencemultiens (supprimemultiens ((a,b)) (ens1)) (Add(d,g)) else differencemultiens
-(ens1) (Add(d,g))
-    |Add((a,b),VIDE) -> if appartientmultiens (a) (ens1) then
-supprimemultiens ((a,b)) (ens1) else ens1
-    |VIDE-> ens1 
-else if inclusmultiens (ens1) (ens2) then VIDE 
-else ens1;;
 (*
 profil: differencesymetriquemultiens: ’e multiens -> ’e multiens -> ’e multiens
 semantique:  calcule la différence symétrique de deux multi-ensembles.
-exemples: (1) 
+exemples: (1) differencesymetriquemultiens (Add((1,1), Add((2,1), VIDE)))(Add((2,1), Add((3,1),VIDE))) = Add((1,1), Add((3,1) , VIDE))
 
 Realisation :
 implantation : *)
 let differencesymetriquemultiens (ens1: 'e multiens) (ens2: 'e multiens) : 'e multiens =
-  differencemultiens (unionmultiens(ens1) (ens2)) (intersectionmultiens (ens1) (ens2));;
+  unionmultiens (differencemultiens(ens1)(ens2))(differencemultiens(ens2)(ens1));;
 (*--------------
      Tests
 ---------------*)
 
-
+differencesymetriquemultiens (Add((1,1), Add((2,1), VIDE)))(Add((2,1), Add((3,1),VIDE)));;
+(* - : int multiens = Add ((3, 1), Add ((1, 1), VIDE)) *)
