@@ -164,6 +164,7 @@ inclus(Cons(42, NIL))(Cons(41,Cons(43,NIL)));;
 
    Realisation : 
    implantation : *)
+
 let ajoute (e : 'e) (ens : 'e ensemble): 'e ensemble = Cons(e, ens);;
 
 (*--------------
@@ -203,6 +204,7 @@ ajoute 5 (Cons(6,NIL));;
       La fonction termine bien.
       
    implantation : *)
+
 let rec supprime (e : 'e)(ens : 'e ensemble) : 'e ensemble =
   match ens with
     | NIL -> NIL
@@ -283,7 +285,7 @@ intersection (Cons(1, Cons(2, NIL))) (Cons(3, Cons(2, NIL)));;
    Profil : difference : 'e ensemble -> 'e ensemble -> 'e ensemble
    Semantique : difference intersection e1 e2 renvoie la difference des ensembles e1 et e2
    Exemples : (1) difference (Cons(1, Cons(2, NIL))) (Cons(3, Cons(2, NIL))) = Cons(1,NIL)
-
+              (2) difference (Cons(1,Cons(2, NIL)))(NIL)
    Realisation : 
    
    Equations récursives :
@@ -318,15 +320,17 @@ let rec difference (e1 : 'e ensemble)(e2 : 'e ensemble) : 'e ensemble =
 ---------------*)
 
 difference (Cons(1, Cons(2, NIL))) (Cons(3, Cons(2, NIL)));;
-
 (* - : int ensemble = Cons (1, NIL) *)
+
+difference (Cons(1,Cons(2, NIL)))(NIL);;
+(* - : int ensemble = Cons (1, Cons (2, NIL)) *)
 
 (* On définit une fonction d'ajout d'ensembles pour faciliter la tache. *)
 (* Specification : 
    Profil : union : 'e ensemble -> 'e ensemble -> 'e ensemble
    Semantique : union e1 e2 renvoie l'union des ensembles e1 et e2
    Exemples : (1) union Cons(1, Cons(2, NIL)) Cons(3, Cons(2, NIL)) = Cons(1,Cons(2,Cons(3,NIL)))
-
+              (2) union (Cons(1,Cons(2,Cons(3,NIL)))) (NIL) = Cons(1, Cons(2, Cons(3, NIL)))
    Realisation : 
    
    Equations récursives :
@@ -344,16 +348,21 @@ difference (Cons(1, Cons(2, NIL))) (Cons(3, Cons(2, NIL)));;
       La fonction termine bien.
    implantation : *)
 
-(* Revoir union pour eviter les doublons *)
-
 let rec union ( e1 : 'e ensemble) ( e2 : 'e ensemble) : 'e ensemble = 
   match e1 with
     | NIL -> e2
+    | Cons(e, seq) when appartient e e2 -> union seq e2
     | Cons(e, seq) -> Cons(e, union(seq)(e2));;
 
 (*--------------
      Tests
 ---------------*)
+union (Cons(1,Cons(2,Cons(3,NIL)))) (NIL);;
+(* - : int ensemble = Cons (1, Cons (2, Cons (3, NIL))) *)
+
+union (Cons(1, Cons(2, NIL))) (Cons(3, Cons(2, NIL)));;
+(* - : int ensemble = Cons (1, Cons (3, Cons (2, NIL))) *)
+
 
 (* Specification : 
    Profil : differencesymetrique : 'e ensemble -> 'e ensemble -> 'e ensemble
@@ -497,7 +506,9 @@ appartientmultiens (3) (Add((1,5), Add((2,2), VIDE)));;
 profil: inclusmultiens: ’e multiens -> ’e multiens -> bool 
 semantique: inclusmultiens (ens1) (ens2) renvoi true si le multi-ensemble ens1 est inclus dans le multi-ensemble ens2
 exemples:
-
+            (1) inclusmultiens(Add((1,2), Add((2,5), VIDE)))(Add((0,2), Add((1,2), Add((2,2) , Add((3,6), VIDE))))) = true
+            (2) inclusmultiens(VIDE)(Add((4,2), Add((2,4), VIDE))) = true
+            (3) inclusmultiens(Add((1,2), VIDE))(VIDE) = false
 Realisation :
 
 Equations récursives :
@@ -523,6 +534,14 @@ let rec inclusmultiens (e1 : 'e multiens)(e2 : 'e multiens) : bool =
      Tests
 ---------------*)
 
+inclusmultiens(Add((1,2), Add((2,5), VIDE)))(Add((0,2), Add((1,2), Add((2,2) , Add((3,6), VIDE)))));;
+(* - : bool = true *)
+
+inclusmultiens(VIDE)(Add((4,2), Add((2,4), VIDE)));;
+(* - : bool = true *)
+
+inclusmultiens(Add((1,2), VIDE))(VIDE);;
+(* - : bool = false *)
 
 (*
 profil: ajoutemultiens: ’e mutielt  -> ’e multiens -> ’e multiens 
