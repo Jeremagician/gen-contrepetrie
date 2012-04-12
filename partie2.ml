@@ -1,4 +1,4 @@
-(* PARTIE 2 *)
+(* PARTIE 2  *)
 (* /!\ CE N'EST PAS TOUT A FAIT CORRECT (gere pas le polymorphisme) *)
 type multiens = (int * int) list;;
 
