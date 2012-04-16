@@ -34,11 +34,6 @@ occurencesmultiens (2) ([(1,2);(3,4);(2,2)]);;
 occurencesmultiens (3) ([(5,1);(2,1)]);;
 (* - : int = 0 *)
 
-(* implantation 2 : (rien ne change) *)
-let appartientmultiens (e :'e) ( ens :multiens) : bool = occurencesmultiens e ens > 0;;
-
-
-
 (* implantation 2 : *)
 let rec inclusmultiens (ens1: multiens)(ens2: multiens):bool =
   match ens1 with
