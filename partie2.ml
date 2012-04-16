@@ -164,3 +164,40 @@ differencemultiens [(3,4);(2,5)] [(1,1);(2,4)];;
 
 differencemultiens [(1,4);(2,3)] [(1,1);(2,3)];;
 (* - : multiens = [(1, 3)] *)
+
+
+
+(***************************************************/!\ Mauvais en presentation /!\
+         Reecritures avec fold
+****************************************************)
+
+(* implantation 2 : *)
+let cardinal (ens: 'e list): int = List.fold_left (+) 0 ens;;
+
+(*--------------
+     Tests
+---------------*)
+cardinal [1;2;4];; 
+(* - : int = 7 *)
+
+cardinal [];;
+(* - : int = 0 *)
+
+
+(* implantation 3 : *)
+let cardinalmultiens (ens: multiens): int*int =
+  List.fold_left (fun (_,i1) (_,i2) -> (List.length(ens), i1+i2)) (0,0) ens;;
+
+(*--------------
+     Tests
+---------------*)
+cardinalmultiens [(1,2);(2,5);(4,1)];; 
+(* - : int * int = (3, 8) *)
+
+cardinalmultiens [];;
+(* - : int * int = (0, 0) *)
+
+
+(
+
+
