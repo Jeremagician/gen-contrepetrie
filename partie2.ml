@@ -167,8 +167,8 @@ differencemultiens [(1,4);(2,3)] [(1,1);(2,3)];;
 
 
 
-(***************************************************/!\ Mauvais en presentation /!\
-         Reecritures avec fold
+(***************************************************
+            Reecritures avec fold
 ****************************************************)
 
 (* implantation 2 : *)
@@ -202,9 +202,9 @@ let inclus (ens: multiens) (ens: multiens): bool =
 
 
 
-
-(* Partie 4 *)
-(* Dictionnaire *)
+(***************************************************
+             Partie 4 : Dictionnaire
+****************************************************)
 
 
 
@@ -215,11 +215,11 @@ type mot = char list;;
 type dico = mot list;;
 
 
-(* "Définissez mondico comme le dictionnaire contenant les mots de la contrepeterie donnée en exemple" *)
+(* "1 - Définissez mondico comme le dictionnaire contenant les mots de la contrepeterie donnée en exemple" *)
 let mondico = [['q';'e';'l';'l';'e'];['m';'i';'n';'i';'s';'t';'r';'e'];['s';'e';'c';'h';'e']];;
 
 
-(* Programmez une fonction qui teste si un mot est dans un dictionnaire.
+(* "2 - Programmez une fonction qui teste si un mot est dans un dictionnaire"
 
 Specification :
 Profil : present : mot -> dico -> bool
@@ -243,7 +243,7 @@ present ['s';'e';'c';'h';'e'] mondico;;
 (* - : bool = true *)
 
 
-(* Programmez une fonction d'ajout d'un mot dans un dictionnaire.
+(* "3 - Programmez une fonction d'ajout d'un mot dans un dictionnaire."
 
 Specification :
 Profil : ajout : mot -> dico -> dico
@@ -265,6 +265,42 @@ let ajout (mot: mot) (dico: dico): dico =
 
 ajout ['o';'u';'i'] [];;
 (* - : dico = [['o'; 'u'; 'i']] *)
+
+(* 4. Enrichissez ce dictionnaire afin de permettre deux exemples de vos propres contrepeteries. *)
+ajout ['l';'a'] dico;;
+ajout ['p';'e';'r';'c';'e';'u';'s';'e'] dico;;
+ajout ['v';'i';'s';'s';'e';'u';'s';'e'] dico;;
+
+(* La perceuse visseuse *)
+
+(* /!\ Il faut en trouver une autre mais y'as que des trucs trop salasse sur le net ... /!\ *)
+
+
+(***************************************************
+            Verificateur de contrepet
+****************************************************)
+
+(* 1 - Specification :
+Profil : supprimeprefixecommun : mot -> mot -> (mot * mot)
+Semantique : ajout un mot dans un dico.
+Exemples : (1) supprimeprefixecommun ['m';'o';'t';'e';'u';'r'] ['m';'o';'t';'u';'s'] = (['e';'u';'r'], ['u';'s'])
+
+Realisation :
+Equations Recursives :
+implantation : *)
+
+let rec supprimeprefixecommun (mot1: mot) (mot2: mot): (mot * mot) =
+  match mot1 with
+    | [] -> (mot1, mot2)
+    | h::t -> let h2::t2 = mot2 in if (h = h2) then supprimeprefixecommun t t2 else (mot1,  mot2);;
+
+ supprimeprefixecommun ['m';'o';'t';'e';'u';'r'] ['m';'o';'t';'u';'s'];;
+(* - : mot * mot = (['e'; 'u'; 'r'], ['u'; 's']) *)
+
+ supprimeprefixecommun ['o';'u';'i'] ['n';'o';'n'];;
+(* - : mot * mot = (['o'; 'u'; 'i'], ['n'; 'o'; 'n']) *)
+
+
 
 
 
