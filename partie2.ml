@@ -186,7 +186,7 @@ cardinal [];;
 
 (* implantation 3 : *)
 let cardinalmultiens (ens: multiens): int*int =
-  List.fold_left (fun (_,i1) (_,i2) -> (List.length(ens), i1+i2)) (0,0) ens;;
+  List.fold_left (fun (e1,i1) (_,i2) -> (e1 + 1, i1+i2)) (0,0) ens;;
 
 (*--------------
      Tests
@@ -227,7 +227,6 @@ Semantique : present mot dico retourne true si mot est present dans dico. False 
 Exemples : (1) present ['m';'o';'t'] [['o';'u';'i'];['n';'o';'n']] = false
 (2) present ['o';'u';'i'] [['o';'u';'i'];['n';'o';'n']] = true
 
-Realisation :
 implantation : *)
 let present (mot: mot)(dico: dico):bool = List.fold_left ( fun a b -> a || b = mot ) false dico;;
 
@@ -242,6 +241,32 @@ present ['o';'u';'i'] [['o';'u';'i'];['n';'o';'n']];;
 
 present ['s';'e';'c';'h';'e'] mondico;;
 (* - : bool = true *)
+
+
+(* Programmez une fonction d'ajout d'un mot dans un dictionnaire.
+
+Specification :
+Profil : ajout : mot -> dico -> dico
+Semantique : ajout un mot dans un dico.
+Exemples : (1) ajout ['m';'o';'t'] [['o';'u';'i'];['n';'o';'n']] = [['o';'u';'i'];['n';'o';'n'];['m';'o';'t']]
+(2) ajout ['o';'u';'i'] [] = [['o';'u';'i']]
+
+implantation : *)
+
+let ajout (mot: mot) (dico: dico): dico = 
+  if present mot dico then dico else mot::dico;;
+
+(*--------------
+     Tests
+---------------*)
+
+ ajout ['m';'o';'t'] [['o';'u';'i'];['n';'o';'n']];;
+(* - : dico = [['m'; 'o'; 't']; ['o'; 'u'; 'i']; ['n'; 'o'; 'n']] *)
+
+ajout ['o';'u';'i'] [];;
+(* - : dico = [['o'; 'u'; 'i']] *)
+
+
 
 
 
