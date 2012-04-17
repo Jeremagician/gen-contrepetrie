@@ -198,6 +198,54 @@ cardinalmultiens [];;
 (* - : int * int = (0, 0) *)
 
 
-(
+let inclus (ens: multiens) (ens: multiens): bool =
+
+
+
+
+(* Partie 4 *)
+(* Dictionnaire *)
+
+
+
+type mot = char list;;
+(* type 'e ensemble = NIL | Cons of 'e * 'e ensemble;;|  WTF l'ennonce pourquoi ne pas utiliser une liste ???? *)
+
+(* type dico = mot ensemble;; *)
+type dico = mot list;;
+
+
+(* "Définissez mondico comme le dictionnaire contenant les mots de la contrepeterie donnée en exemple" *)
+let mondico = [['q';'e';'l';'l';'e'];['m';'i';'n';'i';'s';'t';'r';'e'];['s';'e';'c';'h';'e']];;
+
+
+(* Programmez une fonction qui teste si un mot est dans un dictionnaire.
+
+Specification :
+Profil : present : mot -> dico -> bool
+Semantique : present mot dico retourne true si mot est present dans dico. False sinon.
+Exemples : (1) present ['m';'o';'t'] [['o';'u';'i'];['n';'o';'n']] = false
+(2) present ['o';'u';'i'] [['o';'u';'i'];['n';'o';'n']] = true
+
+Realisation :
+implantation : *)
+let present (mot: mot)(dico: dico):bool = List.fold_left ( fun a b -> a || b = mot ) false dico;;
+
+(*--------------
+     Tests
+---------------*)
+present ['m';'o';'t'] [['o';'u';'i'];['n';'o';'n']];;
+(* - : bool = false *)
+
+present ['o';'u';'i'] [['o';'u';'i'];['n';'o';'n']];;
+(* - : bool = true *)
+
+present ['s';'e';'c';'h';'e'] mondico;;
+(* - : bool = true *)
+
+
+
+
+
 
 
