@@ -287,12 +287,23 @@ Exemples : (1) supprimeprefixecommun ['m';'o';'t';'e';'u';'r'] ['m';'o';'t';'u';
 
 Realisation :
 Equations Recursives :
+    supprimeprefiwecommun [] mot2 -> ([],mot2)
+    supprimeprefixecommun h::t h2::t2 -> supprimeprefixecommun t t2 si h = h2
+                                      -> (h::t, h2::t2) sinon
+
+terminaison :
 implantation : *)
 
+(*/!\ Warnings a l'execution que je ne comprend pas *)
 let rec supprimeprefixecommun (mot1: mot) (mot2: mot): (mot * mot) =
   match mot1 with
     | [] -> (mot1, mot2)
-    | h::t -> let h2::t2 = mot2 in if (h = h2) then supprimeprefixecommun t t2 else (mot1,  mot2);;
+    | h::t when mot2 != [] -> let h2::t2 = mot2 in if (h = h2) then supprimeprefixecommun t t2 else (mot1,  mot2);;
+
+
+(*--------------
+     Tests
+---------------*)
 
  supprimeprefixecommun ['m';'o';'t';'e';'u';'r'] ['m';'o';'t';'u';'s'];;
 (* - : mot * mot = (['e'; 'u'; 'r'], ['u'; 's']) *)
@@ -301,12 +312,63 @@ let rec supprimeprefixecommun (mot1: mot) (mot2: mot): (mot * mot) =
 (* - : mot * mot = (['o'; 'u'; 'i'], ['n'; 'o'; 'n']) *)
 
 
+(* 2 - Specification :
+Profil : suffixeegaux : mot -> mot -> bool
+Semantique : suffixeegaux mot1 mot2 renvoi true si les mots mot1 et mot2 ne differe que de la premier lettre, false sinon.
+Exemples : (1) suffixeegaux ['m';'o';'t';'e';'u';'r'] ['v';'o';'t';'e';'u';'r'] = true
+           (2) suffixeegaux ['m';'o';'t';'e';'u';'r'] ['v';'o';'l';'e';'u';'r'] = false
+           (3) suffixeegaux ['m';'o';'t';'e';'u';'r'] ['m';'o';'t'] = false
+
+Realisation :
+implantation : *)
+
+let suffixeegaux (mot1: mot) (mot2: mot): bool =
+ if ((List.length mot1 != List.length mot2) || mot1 = [] || mot2 = []) then 
+   false 
+ else
+   let _::suffixe1 = mot1 and _::suffixe2 = mot2 in List.fold_left2 (fun a b c -> a && (b = c) ) true suffixe1 suffixe2;;
+   
+
+(*--------------
+     Tests
+---------------*)
+
+suffixeegaux ['m';'o';'t';'e';'u';'r'] ['v';'o';'t';'e';'u';'r'];;
+(* - : bool = true *)
+
+suffixeegaux ['m';'o';'t';'e';'u';'r'] ['v';'o';'l';'e';'u';'r'];;
+(* - : bool = false *)
+
+suffixeegaux ['m';'o';'t';'e';'u';'r'] [];;
+(* - : bool = false *)
+
+suffixeegaux ['m';'o';'t';'e';'u';'r'] ['m';'o';'t'];;
+(* - : bool = false *)
+
+
+(* 3 - Specification :
+Profil : deuxcontrepets : (mot ∗ mot) -> (mot ∗ mot) -> bool 
+Semantique : détermine si deux couples de mots sont contrepets l’un de l’autre.
+Exemples : 
+Realisation :
+implantation : 
+
+/!\ Pas compris la fonction /!\ *)
+
+(* 4 - Specification :
+Profil : sontsimplecontrepeteries : phrase -> phrase -> bool. 
+Semantique : détermine si deux couples de mots sont contrepets l’un de l’autre.rien compris
+Exemples : 
+Realisation :
+implantation : 
+
+/!\ Pas compris la fonction /!\ *)
 
 
 
-
-
-
+(***************************************************
+            Generateur de contrepets
+****************************************************)
 
 
 
