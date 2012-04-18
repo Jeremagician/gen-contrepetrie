@@ -38,7 +38,7 @@ occurencesmultiens (3) ([(5,1);(2,1)]);;
 let rec inclusmultiens (ens1: multiens)(ens2: multiens):bool =
   match ens1 with
     | [] -> true
-    | (el,_)::t -> appartientmultiens el ens2 && inclusmultiens t ens2;;
+    | (el,occ)::t -> appartientmultiens (el,occ) ens2 && inclusmultiens t ens2;;
 
 
 (*--------------
@@ -198,9 +198,50 @@ cardinalmultiens [];;
 (* - : int * int = (0, 0) *)
 
 
-let inclus (ens: multiens) (ens: multiens): bool =
+(* necessaire pour inclus et inclusmultiens (cf : partie1) *)
+let appartient (e: 'e) (ens: 'e list) : bool =
+  List.fold_left (fun a b -> a || e = b) false ens;;
+
+let appartientmultiens ((el,occ) : int*int) ( ens : multiens) : bool = occurencesmultiens el ens >= occ;;
 
 
+
+(* implantation 2 *)
+let inclus (ens1: 'e list) (ens2: 'e list): bool =
+  List.fold_left (fun a b -> a && (appartient b ens2)) true ens1;;
+
+
+
+
+(*--------------
+     Tests
+---------------*)
+
+inclus ['e';'b'] ['a';'b';'e'];;
+(* - : bool = true *)
+
+inclus ['e';'z'] ['a';'b';'e'];;
+(* - : bool = false *)
+
+inclus [] ['a';'b';'e'];;
+(* - : bool = true *)
+
+(* implantation 3 *)
+let inclusmultiens (ens1: multiens) (ens2: multiens): bool =
+  List.fold_left (fun a b -> a && (appartientmultiens b ens2)) true ens1;;
+
+(*--------------
+     Tests
+---------------*)
+
+inclusmultiens  ([(1,2);(4,7)]) ([(1,2);(4,7);(2,2)]);;
+(* - : bool = true *)
+
+inclusmultiens([])([(4,2);(2,4)]);;
+(* - : bool = true *)
+
+inclusmultiens([(1,2);(2,2)])([(1,1);(3,2)]);;
+(* - : bool = false *)
 
 (***************************************************
              Partie 4 : Dictionnaire
