@@ -1,9 +1,32 @@
 (* PARTIE 2  *)
-(* /!\ CE N'EST PAS TOUT A FAIT CORRECT (gere pas le polymorphisme) *)
-type multiens = (int * int) list;;
+type 'a multiens = ('a * 'a) list;;
+
+type 'a multielt = 'a * int;;
+
+(*
+profil: cardinalmultiens:: ’e multiens -> int∗int 
+semantique:  retourne le couple (nombre de multi-éléments, nombre total d’occurences d'éléments).
+exemples: cardinalmultiens [(1,2);(2,3)] = (2,5)
+          cardinalmultiens [] = (0,0)
+
+
+Realisation :
+Equations récursives :
+        cardinalmultiens []  = (0,0)
+        cardinalmultiens((elem, count)::t) = (a+1, b+count) (avec (a,b) = cardinalmultiens (subens)
+Terminaison :
+        Soit la fonction mesure ( multiens ) = Nombre de multi elements de l'ensemble (multiens)
+        Profil mesure : 'e multiens -> int
+        On a mesure ( Add((elem,count), subens))  = Nombre d'éléments de ((elem,count),subens)
+                                        > mesure ( subens) = 1 + nombre d'éléments de subens
+        Ainsi mesure est une fonction décroissante et minorée par 0.
+        On applique la fonction mesure a l'ensemble passé en paramètre de la fonction cardinalmultiens
+        La fonction termine bien.
+
+implantation : *)
 
 (* implantation 2 : *)
-let rec cardinalmultiens (ens : multiens) : int * int =
+let rec cardinalmultiens (ens : 'a multiens) : int * int =
   match ens with
     | [] -> (0,0)
     | (elem,count)::t -> let (a,b) = cardinalmultiens (t)
@@ -20,7 +43,29 @@ cardinalmultiens [];;
 
 
 (* implantation 2 : *)
-let rec occurencesmultiens (e : int) (ens : multiens) : int =
+
+(*
+profil: occurencesmultiens: ’e -> ’e multiens -> int 
+semantique:  calcule le nombre d’occurences d’un élément dans un multi-ensemble.
+exemples: occurencesmultiens (2) ([1,5];[2,2]) = 2
+          occurencesmultiens (3) ([1,5];[2,2]) = 0
+
+Realisation :
+
+Equations récursives :
+occurencemultiens (element) [] = 0
+occurencemultiens (element) ((elem,count)::t) = count si e1 = element occurencemultiens (element) (subseq) sinon
+
+Terminaison :
+        Soit la fonction mesure ( multiens ) = Nombre de multi elements de l'ensemble (multiens)
+        Profil mesure : 'e multiens -> int
+        On a mesure ( Add((elem,count), subens))  = Nombre d'éléments de ((elem,count),subens)
+                                        > mesure ( subens) = 1 + nombre d'éléments de subens
+        Ainsi mesure est une fonction décroissante et minorée par 0
+        on applique la fonction mesure a l'ensemble passé en paramètre.
+        La fonction termine bien.
+implantation : *)
+let rec occurencesmultiens (e : int) (ens : 'a multiens) : int =
     match ens with
       | [] -> 0
       | (el,count)::t -> if ( el = e ) then count else occurencesmultiens e t;;
@@ -34,11 +79,52 @@ occurencesmultiens (2) ([(1,2);(3,4);(2,2)]);;
 occurencesmultiens (3) ([(5,1);(2,1)]);;
 (* - : int = 0 *)
 
-(* implantation 2 : *)
-let rec inclusmultiens (ens1: multiens)(ens2: multiens):bool =
+(*
+profil: appartientmultiens: ’e -> ’e multiens -> bool 
+semantique:  teste l’appartenance d’un élément à un multi-ensemble.
+exemples: occurencesmultiens (2) ([(1,5);(2,2)]) = true
+          occurencesmultiens (3) ([(1,5);(2,2)]) = false
+
+implantation : *)
+let appartientmultiens (e :'e) ( ens : 'e multiens) : bool = occurencesmultiens e ens > 0;;
+
+(*--------------
+     Tests
+---------------*)
+
+appartientmultiens (2) ([(1,5);(2,2)]);;
+(* - : bool = true *)
+
+appartientmultiens (3) ([(1,5);(2,2)]);;
+(* - : bool = false *)
+
+(*
+profil: inclusmultiens: ’e multiens -> ’e multiens -> bool 
+semantique: inclusmultiens (ens1) (ens2) renvoi true si le multi-ensemble ens1 est inclus dans le multi-ensemble ens2
+exemples:
+            (1) inclusmultiens([(1,2);(2,5)])([(0,2);(1,2);(2,2);(3,6)]) = true
+            (2) inclusmultiens []([(4,2);(2,4)]) = true
+            (3) inclusmultiens([(1,2)])[] = false
+Realisation :
+
+Equations récursives :
+inclusmultiens [] (enssemble2) = true
+inclusmultiens (el,count)::subseq) = appartientmultiens (enssemble1) (enssemble2)
+
+Terminaison :
+        Soit la fonction mesure ( multiens ) = Nombre de multi elements de l'ensemble (multiens)
+        Profil mesure : 'e multiens -> int
+        On a mesure ( Add((elem,count), subens))  = Nombre d'éléments de ((elem,count),subens)
+                                        > mesure ( subens) = 1 + nombre d'éléments de subens
+        Ainsi mesure est une fonction décroissante et minorée par 0.
+        On applique la fonction mesure au premier paramètre de la fonction.
+        La fonction termine bien.
+implantation : *)
+
+let rec inclusmultiens (ens1: 'a multiens)(ens2: 'a multiens):bool =
   match ens1 with
     | [] -> true
-    | (el,occ)::t -> appartientmultiens (el,occ) ens2 && inclusmultiens t ens2;;
+    | (el,occ)::t -> appartientmultiens (el) ens2 && inclusmultiens t ens2;;
 
 
 (*--------------
@@ -54,8 +140,30 @@ inclusmultiens([])([(4,2);(2,4)]);;
 inclusmultiens([(1,2);(2,2)])([]);;
 (* - : bool = false *)
 
-(* implantation 2 : *)
-let rec ajoutemultiens ((e1,occ1): int * int)(ens: multiens): multiens =
+
+(*
+profil: ajoutemultiens: ’e mutielt  -> ’e multiens -> ’e multiens 
+
+semantique: ajoute une ou plusieurs occurences d’élèment à un multi-ensemble.
+exemples: (1) ajoutemultiens (1,2)([(1,1);(2,3)]) = [(1,3);(2,3)]
+          (2) ajoutemultiens (3,2)([(1,1);(2,3)]) = [(1,1);(2,3);(3,2)]
+
+Realisation :
+Equations récursives :
+ajoutemultiens ((e1,occ1)) [] =   [(e1,occ1)] 
+ajoutemultiens ((e1,occ1)) ((e2,occ2)::subseq)) = (e1,occ1+occ2)::subseq) si e1 = e2 ajoutemultiens(e1,occ1)::(subseq)) sinon
+
+Terminaison :
+        Soit la fonction mesure ( multiens ) = Nombre de multi elements de l'ensemble (multiens)
+        Profil mesure : 'e multiens -> int
+        On a mesure ( Add((elem,count), subens))  = Nombre d'éléments de ((elem,count),subens)
+                                        > mesure ( subens) = 1 + nombre d'éléments de subens
+        Ainsi mesure est une fonction décroissante et minorée par 0.
+        On applique la fonction mesure a l'ensemble passé en argument.
+        La fonction termine bien.
+implantation : *)
+
+let rec ajoutemultiens ((e1,occ1): 'a multielt)(ens: 'e multiens): 'e multiens =
   match ens with
     | [] -> [(e1,occ1)]
     | (e2,occ2)::t -> if (e1 = e2) then (e1,occ1+occ2)::t else (e2,occ2)::ajoutemultiens (e1,occ1) t;; 
@@ -71,8 +179,33 @@ ajoutemultiens (3,2) [(1,1);(2,3)];;
 (* - : multiens = [(1, 1); (2, 3); (3, 2)] *)
 
 
-(* implantation 2 : *)
-let rec supprimemultiens ((e1,occ1):'e multielt) (ens: multiens): multiens =
+
+(*
+profil: supprimemultiens: ’e multielt  -> ’e multiens -> ’e multiens 
+semantique: supprime n occurences d’élèment d’un multi-ensemble. Si n est nul, supprime toutes les occurences de cet élément.
+exemples: (1) supprimemultiens (3,2)([(1,1);(2,3)]) = [(1,1);(2,3)]
+          (2) supprimemultiens (2,2)([(1,1);(2,3)]) = [(1,1);(2,1)]
+          (3) supprimemultiens (2,0)([(1,1);(2,3)]) = [(1,1)]
+
+Realisation :
+
+Equations récursives :
+supprimemultiens (element) [] = []
+supprimemultiens ((e1,occ1)) (e2,occ2)::subseq) =  subseq si e1 = e2 et occ1 = 0 ou si e1 = e2 et occ1>=occ2
+                                                         (e1,occ2 - occ1)::subseq si e1 = e2
+                                                         (e1,occ1)::supprimemultiens(e1,occ1)(subseq) sinon
+
+Terminaison :
+        Soit la fonction mesure ( multiens ) = Nombre de multi elements de l'ensemble (multiens)
+        Profil mesure : 'e multiens -> int
+        On a mesure ( Add((elem,count), subens))  = Nombre d'éléments de ((elem,count),subens)
+                                        > mesure ( subens) = 1 + nombre d'éléments de subens
+        Ainsi mesure est une fonction décroissante et minorée par 0.
+        On applique mesure a l'ensemble passé en paramètre.
+        La fonction termine bien.
+implantation : *)
+
+let rec supprimemultiens ((e1,occ1): 'a multielt) (ens: 'a multiens): 'a multiens =
   match ens with
     | [] -> []
     | (e2,occ2)::t when e1=e2 & ( (occ1 = 0) || (occ1>=occ2) ) -> t
@@ -92,8 +225,16 @@ supprimemultiens (2,2)[(1,1);(2,3)];;
 supprimemultiens (2,0)[(1,1);(2,3)];;
 (* - : multiens = [(1, 1)] *)
 
-(* implantation 2 : (rien n'as changé) *)
-let egauxmultiens (ens1: multiens) (ens2: multiens): bool =
+
+(*
+profil: egauxmultiens: ’e multiens  -> ’e multiens -> bool 
+semantique: egauxmultiens (ens1) (ens2) est vrai si les deux multi-ensembles sont égaux.
+exemples: (1) egauxmultiens ([(1,2)])([(1,2)]) = true
+          (2) egauxmultiens ([(1,2)]) ([(1,2);(2,1)]) = false
+
+implantation : *)
+
+let egauxmultiens (ens1: 'a multiens) (ens2: 'a multiens): bool =
   inclusmultiens ens1 ens2 && inclusmultiens ens2 ens1;;
 
 (*--------------
@@ -105,8 +246,30 @@ egauxmultiens [(1,2)] [(1,2)];;
 egauxmultiens [(1,2)] [(1,2);(2,1)];;
 (* - : bool = false *)
 
-(* implantation 2 : *)
-let rec unionmultiens (ens1: multiens) (ens2: multiens): multiens =
+
+(*
+profil: unionmultiens: ’e multiens -> ’e multiens -> ’e multiens.
+semantique: calcule l’union de deux multi-ensembles.
+exemples: (1) unionmultiens ([(1,2)]) ([(1,2);(2,1)]) = [(1,4);(2,1)]
+          (2) unionmultiens ([(1,2)]) ([(3,1)]) =  [(3,1);(1,2)]
+
+Realisation :
+
+Equations récursives :
+unionmultiens [] (enssemble2) = []
+unionmultiens (e, subseq)::(enssemble2) = unionmultiens(subseq) (ajoutemultiens e ens2)
+
+Terminaison :
+        Soit la fonction mesure ( multiens ) = Nombre de multi elements de l'ensemble (multiens)
+        Profil mesure : 'e multiens -> int
+        On a mesure ( Add((elem,count), subens))  = Nombre d'éléments de ((elem,count),subens)
+                                        > mesure ( subens) = 1 + nombre d'éléments de subens
+        Ainsi mesure est une fonction décroissante et minorée par 0.
+        On applique mesure au premier paramètre de la fonction.
+        La fonction termine bien.
+implantation : *)
+
+let rec unionmultiens (ens1: 'a multiens) (ens2: 'a multiens): 'a multiens =
   match ens1 with
     | [] -> ens2
     | h::t -> unionmultiens(t)(ajoutemultiens h ens2);;
@@ -121,8 +284,30 @@ unionmultiens [(1,2)] [(1,2);(2,1)];;
 unionmultiens [(1,2)] [(3,1)];;
 (* - : multiens = [(3, 1); (1, 2)] *)
 
-(* implantation 2 :*)
-let rec intersectionmultiens (ens1: multiens) (ens2: multiens): multiens =
+
+(*
+profil: intersectionmultiens: ’e multiens -> ’e multiens -> ’e multiens 
+semantique: calcule l’intersection de deux multi-ensembles.
+exemples: (1) intersectionmultiens ([(1,2);(2,1)]) ([(2,1)]) = [(2,1)]
+          (2) intersectionmultiens ([(1,3);(2,4)]) ([(3,3);(2,2)]) = [(2,2)]
+Realisation :
+Equations récursives :
+intersectionmultiens [] (enssemble2) = []
+intersection ((e1,occ1)::subseq)) (ens2) = (e1,occ1)::(intersectionmultiens (subseq) (ens2))  si e1 appartien à ens2 et si l'occurence de l'element e1 est plus faible dans le premier ensemble que dans le second
+                                               (e1,occ2)::(intersectionmutiens (subseq) (ens2)) si e1 appartient à ens2 et si l'occurence de l'element e1 est plus forte dans le premier ensemble que dans le second
+                                               intersectionmultiens (subseq) (ens2) sinon
+
+Terminaison :
+  Soit la fonction mesure ( multiens ) = Nombre de multi elements de l'ensemble (multiens)
+        Profil mesure : 'e multiens -> int
+        On a mesure ( Add((elem,count), subens))  = Nombre d'éléments de ((elem,count),subens)
+                                        > mesure ( subens) = 1 + nombre d'éléments de subens
+        Ainsi mesure est une fonction décroissante et minorée par 0.
+        On applique la fonction mesure au premier paramètre.
+        La fonction termine bien.
+implantation : *)
+
+let rec intersectionmultiens (ens1: 'a multiens) (ens2: 'a multiens): 'a multiens =
   match ens1 with
     | [] -> [];
     | (e1,occ1)::t when appartientmultiens (e1) (ens2) ->
@@ -145,8 +330,28 @@ intersectionmultiens [(1,3);(2,4)] [(3,3);(2,2)];;
 (* - : multiens = [(2, 2)] *)
 
 
-(* implantation 2 : *)
-let rec differencemultiens (ens1: multiens) (ens2: multiens): multiens =
+
+(*
+profil: differencemultiens: ’e multiens -> ’e multiens -> ’e multiens 
+semantique: calcule la différence de deux multi-ensembles.
+exemples:
+  (1) differencemultiens ([(1,4);(2,3)])([(1,1);(2,3)]) = [(1,3)]
+Realisation :
+Equations récursives :
+differencemultiens [] ens2 = []
+differencemultiens ((e1,occ)::subseq)) (ens2) = differencemultiens (l'enssemble 1 - (e1,occurence de e1 dans e2)) (ens2 sans e1), si e1 appartien a ens2
+                                                     (e1,occ1)::(differencemultiens (subseq) (ens2)) sinon
+Terminaison :
+      Soit la fonction mesure ( multiens ) = Nombre de multi elements de l'ensemble (multiens)
+      Profil mesure : 'e multiens -> int
+      On a mesure ( Add((elem,count), subens))  = Nombre d'éléments de ((elem,count),subens)
+                                      > mesure ( subens) = 1 + nombre d'éléments de subens
+      Ainsi mesure est une fonction décroissante et minorée par 0.
+      On applique la fonction mesure au premier paramètre.
+      La fonction termine bien.
+implantation : *)
+
+let rec differencemultiens (ens1: 'a multiens) (ens2: 'a multiens): 'a multiens =
   match ens1 with
     | [] -> []
     | (e1,occ1)::t when appartientmultiens (e1) (ens2) ->
@@ -166,12 +371,27 @@ differencemultiens [(1,4);(2,3)] [(1,1);(2,3)];;
 (* - : multiens = [(1, 3)] *)
 
 
+(*
+profil: differencesymetriquemultiens: ’e multiens -> ’e multiens -> ’e multiens
+semantique:  calcule la différence symétrique de deux multi-ensembles.
+exemples: (1) differencesymetriquemultiens ([(1,1);(2,1)])([(2,1);(3,1)]) = [(1,1);(3,1)]
+
+Realisation :
+implantation : *)
+let differencesymetriquemultiens (ens1: 'e multiens) (ens2: 'e multiens) : 'e multiens =
+  unionmultiens (differencemultiens(ens1)(ens2))(differencemultiens(ens2)(ens1));;
+(*--------------
+     Tests
+---------------*)
+
+differencesymetriquemultiens ([(1,1);(2,1)])([(2,1);(3,1)]);;
+(* - : int multiens = [(3, 1); (1, 1)] *)
+
 
 (***************************************************
             Reecritures avec fold
 ****************************************************)
 
-(* implantation 2 : *)
 let cardinal (ens: 'e list): int = List.fold_left (+) 0 ens;;
 
 (*--------------
@@ -185,7 +405,7 @@ cardinal [];;
 
 
 (* implantation 3 : *)
-let cardinalmultiens (ens: multiens): int*int =
+let cardinalmultiens (ens: 'e multiens): int*int =
   List.fold_left (fun (e1,i1) (_,i2) -> (e1 + 1, i1+i2)) (0,0) ens;;
 
 (*--------------
@@ -202,16 +422,13 @@ cardinalmultiens [];;
 let appartient (e: 'e) (ens: 'e list) : bool =
   List.fold_left (fun a b -> a || e = b) false ens;;
 
-let appartientmultiens ((el,occ) : int*int) ( ens : multiens) : bool = occurencesmultiens el ens >= occ;;
+let appartientmultiens ((el,occ) : int*int) ( ens : 'e multiens) : bool = occurencesmultiens el ens >= occ;;
 
 
 
 (* implantation 2 *)
 let inclus (ens1: 'e list) (ens2: 'e list): bool =
   List.fold_left (fun a b -> a && (appartient b ens2)) true ens1;;
-
-
-
 
 (*--------------
      Tests
@@ -227,7 +444,7 @@ inclus [] ['a';'b';'e'];;
 (* - : bool = true *)
 
 (* implantation 3 *)
-let inclusmultiens (ens1: multiens) (ens2: multiens): bool =
+let inclusmultiens (ens1: 'a multiens) (ens2: 'a multiens): bool =
   List.fold_left (fun a b -> a && (appartientmultiens b ens2)) true ens1;;
 
 (*--------------
@@ -242,6 +459,10 @@ inclusmultiens([])([(4,2);(2,4)]);;
 
 inclusmultiens([(1,2);(2,2)])([(1,1);(3,2)]);;
 (* - : bool = false *)
+
+(* implantation 3*)
+let union (ens1: 'e list) (ens2: 'e list): 'e list =
+  List.fold_left (fun a b -> ) [] ens1;;
 
 (***************************************************
              Partie 4 : Dictionnaire
