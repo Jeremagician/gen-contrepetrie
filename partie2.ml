@@ -462,7 +462,29 @@ inclusmultiens([(1,2);(2,2)])([(1,1);(3,2)]);;
 
 (* implantation 3*)
 let union (ens1: 'e list) (ens2: 'e list): 'e list =
-  List.fold_left (fun a b -> ) [] ens1;;
+  List.fold_left (fun a b -> if not(appartient b ens1) then a@[b] else a) ens1 ens2;;
+
+(*--------------                                                                                                                                                                 
+     Tests                                                                                                                                                                    
+ ---------------*)
+union([1;2;3;4]) ([3;4;5;6]);; (* - : int list = [1; 2; 3; 4; 5; 6] *)
+
+union([1;2;3;4])([1;2;3;4]);; (* - : int list = [1; 2; 3; 4] *)
+
+let unionmultien (ens1 : 'e multiens)(ens2 : 'e multiens) : 'e multiens = ;;
+
+(* Implementation 3 *)
+
+let intersection (ens1: 'e list) (ens2: 'e list): 'e list =
+  List.fold_left (fun a b -> if appartient b ens1 then a@[b] else a) [] ens2;;
+
+(* Tests *)
+
+intersection ([1;2;3;4])([2;3;4;5]);; (* - : int list = [2; 3; 4] *)
+intersection ([1;2;3])([4]);; (* - : int list = [] *)
+intersection ([1;2;3])([]);; (* - : int list = [] *)
+
+let intersectionmultiens (ens1 : 'e multiens)(ens2 : 'e multiens) : 'e multiens = [];;
 
 (***************************************************
              Partie 4 : Dictionnaire
@@ -529,9 +551,9 @@ ajout ['o';'u';'i'] [];;
 (* - : dico = [['o'; 'u'; 'i']] *)
 
 (* 4. Enrichissez ce dictionnaire afin de permettre deux exemples de vos propres contrepeteries. *)
-ajout ['l';'a'] dico;;
-ajout ['p';'e';'r';'c';'e';'u';'s';'e'] dico;;
-ajout ['v';'i';'s';'s';'e';'u';'s';'e'] dico;;
+ajout ['l';'a'] mondico;;
+ajout ['p';'e';'r';'c';'e';'u';'s';'e'] mondico;;
+ajout ['v';'i';'s';'s';'e';'u';'s';'e'] mondico;;
 
 (* La perceuse visseuse *)
 
@@ -544,7 +566,7 @@ ajout ['v';'i';'s';'s';'e';'u';'s';'e'] dico;;
 
 (* 1 - Specification :
 Profil : supprimeprefixecommun : mot -> mot -> (mot * mot)
-Semantique : ajout un mot dans un dico.
+Semantique : supprime les prefixes commun entre les deux mots
 Exemples : (1) supprimeprefixecommun ['m';'o';'t';'e';'u';'r'] ['m';'o';'t';'u';'s'] = (['e';'u';'r'], ['u';'s'])
 
 Realisation :
