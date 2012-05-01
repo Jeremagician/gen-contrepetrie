@@ -1,5 +1,5 @@
 (* PARTIE 2  *)
-type 'a multiens = ('a * 'a) list;;
+type 'a multiens = 'a multielt list;;
 
 type 'a multielt = 'a * int;;
 
@@ -471,7 +471,19 @@ union([1;2;3;4]) ([3;4;5;6]);; (* - : int list = [1; 2; 3; 4; 5; 6] *)
 
 union([1;2;3;4])([1;2;3;4]);; (* - : int list = [1; 2; 3; 4] *)
 
-let unionmultien (ens1 : 'e multiens)(ens2 : 'e multiens) : 'e multiens = ;;
+
+(* Implementation 3 *)
+
+let unionmultiens (ens1 : 'e multiens)(ens2 : 'e multiens) : 'e multiens  =
+  List.fold_left (fun a b -> ajoutemultiens b a) ens1 ens2;;
+
+(*--------------                                                                                                                                                                 
+     Tests                                                                                                                                                                    
+ ---------------*)
+unionmultiens [(1,3);(2,4)] [(1,2);(3,1)];; (* - : int multiens = [(1, 5); (2, 4); (3, 1)] *)
+
+unionmultiens [] [(1,2)];; (* - : int multiens = [(1, 2)] *)
+
 
 (* Implementation 3 *)
 
@@ -484,7 +496,23 @@ intersection ([1;2;3;4])([2;3;4;5]);; (* - : int list = [2; 3; 4] *)
 intersection ([1;2;3])([4]);; (* - : int list = [] *)
 intersection ([1;2;3])([]);; (* - : int list = [] *)
 
-let intersectionmultiens (ens1 : 'e multiens)(ens2 : 'e multiens) : 'e multiens = [];;
+let intersectionmultiens (ens1 : 'e multiens)(ens2 : 'e multiens) : 'e multiens =
+  List.fold_left (fun a b -> let (e2,occ2) = b in
+                               if appartientmultiens e2 ens1 then 
+                                 if occurencesmultiens e2 ens1 < occ2 then
+                                   a@[(e2, occurencesmultiens e2 ens1)] 
+                                 else
+                                   a@[(e2,occ2)]
+                               else
+                                 a) [] ens2;;
+
+(*--------------                                                                                                                                                                 
+     Tests                                                                                                                                                                    
+ ---------------*)
+
+intersectionmultiens [(1,2);(2,3)] [(3,2);(2,5)];; (* - : int multiens = [(2, 3)] *)
+intersectionmultiens [(1,2);(2,3)] [(4,2)];; (* - : int multiens = [] *)
+
 
 (***************************************************
              Partie 4 : Dictionnaire
