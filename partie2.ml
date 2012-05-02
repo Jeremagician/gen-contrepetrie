@@ -2,8 +2,8 @@
 
 (* Definition des types *)
 type 'a ensemble = 'a list;;
-type 'a multiens = 'a multielt list;;
 type 'a multielt = 'a * int;;
+type 'a multiens = 'a multielt list;;
 
 (*
 profil: cardinalmultiens:: ’e multiens -> int∗int 
@@ -587,6 +587,24 @@ ajout ['v';'i';'s';'s';'e';'u';'s';'e'] mondico;;
 
 (* /!\ Il faut en trouver une autre mais y'as que des trucs trop salasse sur le net ... /!\ *)
 
+(* Quelques fonction pour faciliter les futurss examples *)
+let rec mot_of_string (s : string) : mot =
+  let rec explode sub i =
+    if i < 0 then sub else explode (s.[i] :: sub) (i-1)in
+  explode [](String.length s - 1);;
+mot_of_string "blabla";;
+
+let rec phrase_of_string(s : string) : mot list =
+  let rec explode phrase mot i =
+    if i < 0 then mot::phrase
+    else
+      if s.[i] = ' ' then
+	explode (mot::phrase) [] (i-1)
+      else
+	explode phrase (s.[i]::mot) (i-1)
+  in explode [] [] (String.length s-1);;
+
+phrase_of_string ("Bonjour comment ca va");;
 
 (***************************************************
             Verificateur de contrepet
@@ -645,13 +663,13 @@ let suffixeegaux (mot1: mot) (mot2: mot): bool =
      Tests
 ---------------*)
 
-suffixeegaux ['m';'o';'t';'e';'u';'r'] ['v';'o';'t';'e';'u';'r'];;
+suffixeegaux (mot_of_string "moteur") (mot_of_string "voteur");;
 (* - : bool = true *)
 
-suffixeegaux ['m';'o';'t';'e';'u';'r'] ['v';'o';'l';'e';'u';'r'];;
+suffixeegaux (mot_of_string "moteur") (mot_of_string "voteur");;
 (* - : bool = false *)
 
-suffixeegaux ['m';'o';'t';'e';'u';'r'] [];;
+suffixeegaux (mot_of_string "moteur") [];;
 (* - : bool = false *)
 
 suffixeegaux ['m';'o';'t';'e';'u';'r'] ['m';'o';'t'];;
@@ -681,9 +699,8 @@ Semantique : détermine si deux couples de mots sont contrepets l’un de l’au
 Exemples : 
 Realisation :
 implantation : 
-
-/!\ Pas compris la fonction /!\ *)
-
+*)
+let sontsimplecontrepeteries (phr1: mot list) (phr2: mot list) : bool =
 
 
 (***************************************************
@@ -754,8 +771,5 @@ let echange ((debut1,l1,fin1) : (mot * char * mot)) ((debut2,l2,fin2) : (mot * c
 
 echange ([],'m',['i';'n';'i';'s';'t';'r';'e']) ([],'s',['e';'c';'h';'e']);;
 
-
-
-
-  
-
+(* Specification
+profil : sontsimplecontrepeteries (phr1: 
