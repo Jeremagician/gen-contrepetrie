@@ -1,6 +1,8 @@
 (* PARTIE 2  *)
-type 'a multiens = 'a multielt list;;
 
+(* Definition des types *)
+type 'a ensemble = 'a list;;
+type 'a multiens = 'a multielt list;;
 type 'a multielt = 'a * int;;
 
 (*
@@ -521,10 +523,8 @@ intersectionmultiens [(1,2);(2,3)] [(4,2)];; (* - : int multiens = [] *)
 
 
 type mot = char list;;
-(* type 'e ensemble = NIL | Cons of 'e * 'e ensemble;;|  WTF l'ennonce pourquoi ne pas utiliser une liste ???? *)
+type dico = mot ensemble;; 
 
-(* type dico = mot ensemble;; *)
-type dico = mot list;;
 
 
 (* "1 - Définissez mondico comme le dictionnaire contenant les mots de la contrepeterie donnée en exemple" *)
@@ -657,15 +657,23 @@ suffixeegaux ['m';'o';'t';'e';'u';'r'] [];;
 suffixeegaux ['m';'o';'t';'e';'u';'r'] ['m';'o';'t'];;
 (* - : bool = false *)
 
-
 (* 3 - Specification :
-Profil : deuxcontrepets : (mot ∗ mot) -> (mot ∗ mot) -> bool 
+Profil : deuxcontrepets : (mot * mot) -> (mot * mot) -> bool 
 Semantique : détermine si deux couples de mots sont contrepets l’un de l’autre.
 Exemples : 
 Realisation :
 implantation : 
+*)
 
-/!\ Pas compris la fonction /!\ *)
+let deuxcontrepets ((mot11,mot12) : (mot*mot))((mot21,mot22) : (mot*mot)): bool = 
+  let (mot1,mot2) = supprimeprefixecommun (mot11)(mot21) and (mot3,mot4) = supprimeprefixecommun (mot12)(mot22) 
+  in suffixeegaux(mot1)(mot2) && suffixeegaux(mot3)(mot4);;
+
+deuxcontrepets(['m';'i';'n';'i';'s';'t';'r';'e'],['s';'e';'c';'h';'e'])(['s';'i';'n';'i';'s';'t';'r';'e'],['m';'e';'c';'h';'e']);;
+(* - : bool = true *)
+
+deuxcontrepets(['s';'a';'l';'u';'t'],['p';'a';'t';'r';'i';'c';'k'])(['s';'a';'p';'u';'t'],['l';'a';'t';'r';'i';'c';'k']);;
+(* - : bool = true *)
 
 (* 4 - Specification :
 Profil : sontsimplecontrepeteries : phrase -> phrase -> bool. 
@@ -682,11 +690,72 @@ implantation :
             Generateur de contrepets
 ****************************************************)
 
-let decompose (m : mot) : (mot * char * mot) list =
+(* 
+profil : decompose :   mot -> (mot * char * mot) ensemble
+semantique : decompose m retourne l'ensemble des decompositions du mot m.
+exemple decompose ['m';'i';'n';'i';'s';'t';'r';'e'] = - : (mot * char * mot) ensemble =
+ [([], 'm', ['i'; 'n'; 'i'; 's'; 't'; 'r'; 'e']);
+ (['m'], 'i', ['n'; 'i'; 's'; 't'; 'r'; 'e']);
+ (['m'; 'i'], 'n', ['i'; 's'; 't'; 'r'; 'e']);
+ (['m'; 'i'; 'n'], 'i', ['s'; 't'; 'r'; 'e']);
+ (['m'; 'i'; 'n'; 'i'], 's', ['t'; 'r'; 'e']);
+ (['m'; 'i'; 'n'; 'i'; 's'], 't', ['r'; 'e']);
+ (['m'; 'i'; 'n'; 'i'; 's'; 't'], 'r', ['e']);
+ (['m'; 'i'; 'n'; 'i'; 's'; 't'; 'r'], 'e', [])]
+
+profil : build : mot*mot -> mot*char*mot ensemble
+semantique : construit la liste des decompositions du mot passé en argument de decompose
+exemple : cf decompose
+
+equation recursive
+   build m1 [] -> ens
+   build m1 h::t -> (m1, h, t)::(build (m1@[h], t) (ens))
+
+terminaison
+   soit mesure(mot2) = nombre de lettre de mot2.
+   mesure('char'::mot2) = mesure(mot2) +1
+   d'ou mesure('char'::mot2) > mesure(mot2)
+   d'ou mesure est décroissante, minorée par 0
+   build termine !
+
+*)
+let decompose (m : mot) : (mot * char * mot) ensemble =
   let rec build ((m1, m2): (mot *mot))(ens : (mot * char * mot) list) = 
     match m2 with
       | [] -> ens
       | h::t -> (m1, h, t)::(build (m1@[h], t) (ens))
   in build([], m) [];;
     
-decompose(['m';'i';'n';'i';'s';'t';'r';'e']);;
+
+(* test *)
+
+decompose ['m';'i';'n';'i';'s';'t';'r';'e'];;
+
+(* - : (mot * char * mot) ensemble =
+[([], 'm', ['i'; 'n'; 'i'; 's'; 't'; 'r'; 'e']);
+ (['m'], 'i', ['n'; 'i'; 's'; 't'; 'r'; 'e']);
+ (['m'; 'i'], 'n', ['i'; 's'; 't'; 'r'; 'e']);
+ (['m'; 'i'; 'n'], 'i', ['s'; 't'; 'r'; 'e']);
+ (['m'; 'i'; 'n'; 'i'], 's', ['t'; 'r'; 'e']);
+ (['m'; 'i'; 'n'; 'i'; 's'], 't', ['r'; 'e']);
+ (['m'; 'i'; 'n'; 'i'; 's'; 't'], 'r', ['e']);
+ (['m'; 'i'; 'n'; 'i'; 's'; 't'; 'r'], 'e', [])] *)
+
+decompose [];; (* - : (mot * char * mot) ensemble = [] *)
+
+
+(* Specification
+   profil : echange : (mot * char * mot) -> (mot * char * mot) -> (mot * mot)
+   exemple : echange ([],'m',['i';'n';'i';'s';'t';'r';'e']) ([],'s',['e';'c';'h';'e'])
+*)
+
+let echange ((debut1,l1,fin1) : (mot * char * mot)) ((debut2,l2,fin2) : (mot * char * mot)) : (mot*mot) =
+  (debut1@(l2::fin1), debut2@(l1::fin2));;
+
+echange ([],'m',['i';'n';'i';'s';'t';'r';'e']) ([],'s',['e';'c';'h';'e']);;
+
+
+
+
+  
+
