@@ -682,5 +682,11 @@ implantation :
             Generateur de contrepets
 ****************************************************)
 
-
-
+let decompose (m : mot) : (mot * char * mot) list =
+  let rec build ((m1, m2): (mot *mot))(ens : (mot * char * mot) list) = 
+    match m2 with
+      | [] -> ens
+      | h::t -> (m1, h, t)::(build (m1@[h], t) (ens))
+  in build([], m) [];;
+    
+decompose(['m';'i';'n';'i';'s';'t';'r';'e']);;
