@@ -394,14 +394,15 @@ differencesymetriquemultiens ([(1,1);(2,1)])([(2,1);(3,1)]);;
             Reecritures avec fold
 ****************************************************)
 
-let cardinal (ens: 'e list): int = List.fold_left (+) 0 ens;;
+(* Erreur *)
+
+let cardinal (ens: 'e list): int = List.fold_left (fun a b -> 1) 0 ens;;
 
 (*--------------
      Tests
 ---------------*)
 cardinal [1;2;4];; 
 (* - : int = 7 *)
-
 cardinal [];;
 (* - : int = 0 *)
 
