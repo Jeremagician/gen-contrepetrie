@@ -38,7 +38,7 @@ appartient (256)([255;2]);; (* - : bool = false *)
 appartient 42 ([15;42;24]);; (* - : bool = true *)
 
 (*
-profil: cardinalmultiens:: ’e multiens -> int∗int 
+profil: cardinalmultiens:: ’e multiens -> int*int 
 semantique:  retourne le couple (nombre de multi-éléments, nombre total d’occurences d'éléments).
 exemples: cardinalmultiens [(1,2);(2,3)] = (2,5)
           cardinalmultiens [] = (0,0)
@@ -449,16 +449,6 @@ cardinalmultiens [(1,2);(2,5);(4,1)];;
 
 cardinalmultiens [];;
 (* - : int * int = (0, 0) *)
-
-
-(* necessaire pour inclus et inclusmultiens (cf : partie1) *)
-let appartient (e: 'e) (ens: 'e list) : bool =
-  List.fold_left (fun a b -> a || e = b) false ens;;
-
-let appartientmultiens ((el,occ) : int*int) ( ens : 'e multiens) : bool = occurencesmultiens el ens >= occ;;
-
-
-
 (* implantation 2 *)
 let inclus (ens1: 'e list) (ens2: 'e list): bool =
   List.fold_left (fun a b -> a && (appartient b ens2)) true ens1;;
@@ -532,7 +522,7 @@ intersection ([1;2;3])([]);; (* - : int list = [] *)
 let intersectionmultiens (ens1 : 'e multiens)(ens2 : 'e multiens) : 'e multiens =
   List.fold_left (fun a b -> let (e2,occ2) = b in
                                if appartientmultiens e2 ens1 then 
-                                 if occurencesmultiens e2 ens1 < occ2 then
+                                 if (occurencesmultiens e2 ens1) < occ2 then
                                    a@[(e2, occurencesmultiens e2 ens1)] 
                                  else
                                    a@[(e2,occ2)]
@@ -662,7 +652,6 @@ Equations Recursives :
 terminaison :
 implantation : *)
 
-(*/!\ Warnings a l'execution que je ne comprend pas *)
 let rec supprimeprefixecommun (mot1: mot) (mot2: mot): (mot * mot) =
   match mot1 with
     | [] -> (mot1, mot2)
@@ -676,7 +665,7 @@ let rec supprimeprefixecommun (mot1: mot) (mot2: mot): (mot * mot) =
 supprimeprefixecommun (mot_of_string "moteur")  (mot_of_string "motus");;
 (* - : mot * mot = (['e'; 'u'; 'r'], ['u'; 's']) *)
 
- supprimeprefixecommun ['o';'u';'i'] ['n';'o';'n'];;
+supprimeprefixecommun ['o';'u';'i'] ['n';'o';'n'];;
 (* - : mot * mot = (['o'; 'u'; 'i'], ['n'; 'o'; 'n']) *)
 
 
@@ -953,7 +942,7 @@ let contrepetrie (phrase : phrase)(dico : dico) : phrase ensemble =
   parcourirphrase phrase dico ([],phrase);;
 
 contrepetrie (phrase_of_string "quelle ministre seche") mondico;;
-contrepetrie (phrase_of_string "la ministre seche  perceuse visseuse") mondico;;
+contrepetrie (phrase_of_string "la ministre seche et perceuse visseuse") mondico;;
 contrepetrie (phrase_of_string "Votre pere a l'air mutin") mondico;;
 
 
