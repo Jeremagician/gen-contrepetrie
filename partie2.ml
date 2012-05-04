@@ -1,7 +1,41 @@
 (* PARTIE 2  *)
-type 'a multiens = ('a * 'a) list;;
 
+(* Definition des types *)
+type 'a ensemble = 'a list;;
 type 'a multielt = 'a * int;;
+type 'a multiens = 'a multielt list;;
+
+(* Specification : 
+   Profil : appartient : 'e -> 'e ensemble -> bool
+   Semantique : appartient(e)(ens) renvoie true si e appartient a l'ensemble ens
+                et false sinon
+   Exemples : (1) appartient (256)([255;2]) = false
+              (2) appartient 42 ([15;42;24]) = true
+
+   Realisation : *
+   
+   Equations récursives :
+      appartient (element)(NIL) = false
+      appartient (element)(h::t) = el = element || appartient element t
+    
+   Terminaison :
+    Soit la fonction mesure ( ens ) = Nombre d'éléments de l'ensemble ens
+    Profil mesure : 'e ensemble -> int
+    On a mesure ( Cons(e,sousens) )  = Nombre d'éléments de (e,sousens)
+                               > mesure ( sousens) = 1 + nombre d'éléments de sousens
+    Ainsi mesure est une fonction décroissante et minorée par 0
+    La fonction termine bien.
+   implantation : *)
+
+let rec appartient (e: 'e) (ens: 'e ensemble) : bool = 
+  match ens with
+    | [] ->  false
+    | h::t -> h = e || appartient e t;;
+
+
+appartient (256)([255;2]);; (* - : bool = false *)
+
+appartient 42 ([15;42;24]);; (* - : bool = true *)
 
 (*
 profil: cardinalmultiens:: ’e multiens -> int∗int 
@@ -392,14 +426,15 @@ differencesymetriquemultiens ([(1,1);(2,1)])([(2,1);(3,1)]);;
             Reecritures avec fold
 ****************************************************)
 
-let cardinal (ens: 'e list): int = List.fold_left (+) 0 ens;;
+(* Erreur *)
+
+let cardinal (ens: 'e list): int = List.fold_left (fun a b -> a + 1) 0 ens;;
 
 (*--------------
      Tests
 ---------------*)
 cardinal [1;2;4];; 
 (* - : int = 7 *)
-
 cardinal [];;
 (* - : int = 0 *)
 
@@ -471,7 +506,19 @@ union([1;2;3;4]) ([3;4;5;6]);; (* - : int list = [1; 2; 3; 4; 5; 6] *)
 
 union([1;2;3;4])([1;2;3;4]);; (* - : int list = [1; 2; 3; 4] *)
 
-let unionmultien (ens1 : 'e multiens)(ens2 : 'e multiens) : 'e multiens = ;;
+
+(* Implementation 3 *)
+
+let unionmultiens (ens1 : 'e multiens)(ens2 : 'e multiens) : 'e multiens  =
+  List.fold_left (fun a b -> ajoutemultiens b a) ens1 ens2;;
+
+(*--------------                                                                                                                                                                 
+     Tests                                                                                                                                                                    
+ ---------------*)
+unionmultiens [(1,3);(2,4)] [(1,2);(3,1)];; (* - : int multiens = [(1, 5); (2, 4); (3, 1)] *)
+
+unionmultiens [] [(1,2)];; (* - : int multiens = [(1, 2)] *)
+
 
 (* Implementation 3 *)
 
@@ -484,7 +531,23 @@ intersection ([1;2;3;4])([2;3;4;5]);; (* - : int list = [2; 3; 4] *)
 intersection ([1;2;3])([4]);; (* - : int list = [] *)
 intersection ([1;2;3])([]);; (* - : int list = [] *)
 
-let intersectionmultiens (ens1 : 'e multiens)(ens2 : 'e multiens) : 'e multiens = [];;
+let intersectionmultiens (ens1 : 'e multiens)(ens2 : 'e multiens) : 'e multiens =
+  List.fold_left (fun a b -> let (e2,occ2) = b in
+                               if appartientmultiens e2 ens1 then 
+                                 if occurencesmultiens e2 ens1 < occ2 then
+                                   a@[(e2, occurencesmultiens e2 ens1)] 
+                                 else
+                                   a@[(e2,occ2)]
+                               else
+                                 a) [] ens2;;
+
+(*--------------                                                                                                                                                                 
+     Tests                                                                                                                                                                    
+ ---------------*)
+
+intersectionmultiens [(1,2);(2,3)] [(3,2);(2,5)];; (* - : int multiens = [(2, 3)] *)
+intersectionmultiens [(1,2);(2,3)] [(4,2)];; (* - : int multiens = [] *)
+
 
 (***************************************************
              Partie 4 : Dictionnaire
@@ -493,15 +556,27 @@ let intersectionmultiens (ens1 : 'e multiens)(ens2 : 'e multiens) : 'e multiens 
 
 
 type mot = char list;;
-(* type 'e ensemble = NIL | Cons of 'e * 'e ensemble;;|  WTF l'ennonce pourquoi ne pas utiliser une liste ???? *)
+type dico = mot ensemble;; 
 
-(* type dico = mot ensemble;; *)
-type dico = mot list;;
+(* Quelques fonction pour faciliter les futurss examples *)
+let rec mot_of_string (s : string) : mot =
+  let rec explode sub i =
+    if i < 0 then sub else explode (s.[i] :: sub) (i-1)in
+  explode [](String.length s - 1);;
+
+let rec phrase_of_string(s : string) : mot list =
+  let rec explode phrase mot i =
+    if i < 0 then mot::phrase
+    else
+      if s.[i] = ' ' then
+	explode (mot::phrase) [] (i-1)
+      else
+	explode phrase (s.[i]::mot) (i-1)
+  in explode [] [] (String.length s-1);;
 
 
 (* "1 - Définissez mondico comme le dictionnaire contenant les mots de la contrepeterie donnée en exemple" *)
-let mondico = [['q';'e';'l';'l';'e'];['m';'i';'n';'i';'s';'t';'r';'e'];['s';'e';'c';'h';'e']];;
-
+let mondico = [mot_of_string "quelle"; mot_of_string "ministre"; mot_of_string "seche"];;
 
 (* "2 - Programmez une fonction qui teste si un mot est dans un dictionnaire"
 
@@ -544,21 +619,18 @@ let ajout (mot: mot) (dico: dico): dico =
      Tests
 ---------------*)
 
- ajout ['m';'o';'t'] [['o';'u';'i'];['n';'o';'n']];;
+ajout ['m';'o';'t'] [['o';'u';'i'];['n';'o';'n']];;
 (* - : dico = [['m'; 'o'; 't']; ['o'; 'u'; 'i']; ['n'; 'o'; 'n']] *)
 
 ajout ['o';'u';'i'] [];;
 (* - : dico = [['o'; 'u'; 'i']] *)
 
 (* 4. Enrichissez ce dictionnaire afin de permettre deux exemples de vos propres contrepeteries. *)
-ajout ['l';'a'] mondico;;
-ajout ['p';'e';'r';'c';'e';'u';'s';'e'] mondico;;
-ajout ['v';'i';'s';'s';'e';'u';'s';'e'] mondico;;
+let mondico = ajout ['l';'a'] mondico;;
+let mondico = ajout ['p';'e';'r';'c';'e';'u';'s';'e'] mondico;;
+let mondico = ajout ['v';'i';'s';'s';'e';'u';'s';'e'] mondico;;
 
 (* La perceuse visseuse *)
-
-(* /!\ Il faut en trouver une autre mais y'as que des trucs trop salasse sur le net ... /!\ *)
-
 
 (***************************************************
             Verificateur de contrepet
@@ -589,7 +661,7 @@ let rec supprimeprefixecommun (mot1: mot) (mot2: mot): (mot * mot) =
      Tests
 ---------------*)
 
- supprimeprefixecommun ['m';'o';'t';'e';'u';'r'] ['m';'o';'t';'u';'s'];;
+supprimeprefixecommun (mot_of_string "moteur")  (mot_of_string "motus");;
 (* - : mot * mot = (['e'; 'u'; 'r'], ['u'; 's']) *)
 
  supprimeprefixecommun ['o';'u';'i'] ['n';'o';'n'];;
@@ -617,42 +689,147 @@ let suffixeegaux (mot1: mot) (mot2: mot): bool =
      Tests
 ---------------*)
 
-suffixeegaux ['m';'o';'t';'e';'u';'r'] ['v';'o';'t';'e';'u';'r'];;
+suffixeegaux (mot_of_string "moteur") (mot_of_string "voteur");;
 (* - : bool = true *)
 
-suffixeegaux ['m';'o';'t';'e';'u';'r'] ['v';'o';'l';'e';'u';'r'];;
+suffixeegaux (mot_of_string "moteur") (mot_of_string "voteur");;
 (* - : bool = false *)
 
-suffixeegaux ['m';'o';'t';'e';'u';'r'] [];;
+suffixeegaux (mot_of_string "moteur") [];;
 (* - : bool = false *)
 
-suffixeegaux ['m';'o';'t';'e';'u';'r'] ['m';'o';'t'];;
+suffixeegaux (mot_of_string "moteur") (mot_of_string "mot");;
 (* - : bool = false *)
-
 
 (* 3 - Specification :
-Profil : deuxcontrepets : (mot ∗ mot) -> (mot ∗ mot) -> bool 
+Profil : deuxcontrepets : (mot * mot) -> (mot * mot) -> bool 
 Semantique : détermine si deux couples de mots sont contrepets l’un de l’autre.
 Exemples : 
 Realisation :
 implantation : 
+*)
 
-/!\ Pas compris la fonction /!\ *)
+let deuxcontrepets ((mot11,mot12) : (mot*mot))((mot21,mot22) : (mot*mot)): bool = 
+  let (mot1,mot2) = supprimeprefixecommun (mot11)(mot21) and (mot3,mot4) = supprimeprefixecommun (mot12)(mot22) 
+  in suffixeegaux(mot1)(mot2) && suffixeegaux(mot3)(mot4);;
+deuxcontrepets(mot_of_string "ministre", mot_of_string "seche")(mot_of_string "sinistre", mot_of_string "meche");;
+(* - : bool = true *)
+deuxcontrepets(mot_of_string "salut", mot_of_string "patrick")(mot_of_string "saput", mot_of_string "latrick");;
+(* - : bool = true *)
+
+
+
+(* Specification
+Profil : estcontrepetrievalide : mot list -> mot list -> bool
+Semantique : estcontrepetrievalide phrase1 phrase2 retourne true si les listes sont de la forme [mot;mot] et que les mots sont deux contrepets
+
+implantation :
+*)
+
+let estcontrepetrievalide (phr1 : mot list)( phr2 : mot list) : bool =
+  if List.length phr1 <> 2 || List.length phr2 <> 2 then
+      false
+    else
+      let h1::(t1::[]) = phr1 and h2::(t2::[]) = phr2 in deuxcontrepets(h1,t1)(h2,t2);;
+
 
 (* 4 - Specification :
 Profil : sontsimplecontrepeteries : phrase -> phrase -> bool. 
 Semantique : détermine si deux couples de mots sont contrepets l’un de l’autre.rien compris
-Exemples : 
+Exemples : sontsimplescontrepeteries (phrase_of_string "quelle ministre tres seche")(phrase_of_string "quelle sinistre tres meche") = true
+           sontsimplescontrepeteries phrase_of_string "quelle ministre trop seche")(phrase_of_string "quelle sinistre tres meche") = false
 Realisation :
+
+   profil : iterate -> mot list -> mot list -> mot list
+   semantique : iterate phrase1 refe supprime l'intersection de phrase1 et refe
+   
+   Equation rrecursive : iterate [] refe -> []
+                         iterate h::t refe -> si h appartient a refe alors iterate t refe
+                                              sinon h::(iterate t refe)
+   Terminaison : soit mesure (phrase1) le nombre de mot de mot de phrase1;
+                 mesure (mot::phrase1) = 1 + mesure (phrase1) donc
+                 mesure est decroissante donc iterate termine.
+
 implantation : 
+*)
 
-/!\ Pas compris la fonction /!\ *)
+let sontsimplecontrepeteries (phr1: mot list) (phr2: mot list): bool=
+  let rec iterate (phr : mot list) (refe : mot list) : mot list =
+    match phr with
+      | [] -> []
+      | h::t -> if appartient h refe then iterate t refe else h::(iterate t refe)
+  in 
+    estcontrepetrievalide (iterate phr1 phr2)(iterate phr2 phr1);;
 
+
+(* test *)
+
+sontsimplecontrepeteries(phrase_of_string "quelle ministre tres seche")(phrase_of_string "quelle sinistre tres meche");; (* - : bool = true *)
+sontsimplecontrepeteries (phrase_of_string "quelle ministre trop seche")(phrase_of_string "quelle sinistre tres meche");; (* - : bool = false *)
 
 
 (***************************************************
             Generateur de contrepets
 ****************************************************)
 
+(* 
+profil : decompose :   mot -> (mot * char * mot) ensemble
+semantique : decompose m retourne l'ensemble des decompositions du mot m.
+exemple decompose ['m';'i';'n';'i';'s';'t';'r';'e'] = - : (mot * char * mot) ensemble =
+ [([], 'm', ['i'; 'n'; 'i'; 's'; 't'; 'r'; 'e']);
+ (['m'], 'i', ['n'; 'i'; 's'; 't'; 'r'; 'e']);
+ (['m'; 'i'], 'n', ['i'; 's'; 't'; 'r'; 'e']);
+ (['m'; 'i'; 'n'], 'i', ['s'; 't'; 'r'; 'e']);
+ (['m'; 'i'; 'n'; 'i'], 's', ['t'; 'r'; 'e']);
+ (['m'; 'i'; 'n'; 'i'; 's'], 't', ['r'; 'e']);
+ (['m'; 'i'; 'n'; 'i'; 's'; 't'], 'r', ['e']);
+ (['m'; 'i'; 'n'; 'i'; 's'; 't'; 'r'], 'e', [])]
+
+profil : build : mot*mot -> mot*char*mot ensemble
+semantique : construit la liste des decompositions du mot passé en argument de decompose
+exemple : cf decompose
+
+equation recursive
+   build m1 [] -> ens
+   build m1 h::t -> (m1, h, t)::(build (m1@[h], t) (ens))
+
+terminaison
+   soit mesure(mot2) = nombre de lettre de mot2.
+   mesure('char'::mot2) = mesure(mot2) +1
+   d'ou mesure('char'::mot2) > mesure(mot2)
+   d'ou mesure est décroissante, minorée par 0
+   build termine !
+
+*)
+let decompose (m : mot) : (mot * char * mot) ensemble =
+  let rec build ((m1, m2): (mot *mot))(ens : (mot * char * mot) list) = 
+    match m2 with
+      | [] -> ens
+      | h::t -> (m1, h, t)::(build (m1@[h], t) (ens))
+  in build([], m) [];;
+    
+
+(* test *)
+decompose (mot_of_string "ministre");;
+(* - : (mot * char * mot) ensemble =
+[([], 'm', ['i'; 'n'; 'i'; 's'; 't'; 'r'; 'e']);
+ (['m'], 'i', ['n'; 'i'; 's'; 't'; 'r'; 'e']);
+ (['m'; 'i'], 'n', ['i'; 's'; 't'; 'r'; 'e']);
+ (['m'; 'i'; 'n'], 'i', ['s'; 't'; 'r'; 'e']);
+ (['m'; 'i'; 'n'; 'i'], 's', ['t'; 'r'; 'e']);
+ (['m'; 'i'; 'n'; 'i'; 's'], 't', ['r'; 'e']);
+ (['m'; 'i'; 'n'; 'i'; 's'; 't'], 'r', ['e']);
+ (['m'; 'i'; 'n'; 'i'; 's'; 't'; 'r'], 'e', [])] *)
+
+decompose [];; (* - : (mot * char * mot) ensemble = [] *)
 
 
+(* Specification
+   profil : echange : (mot * char * mot) -> (mot * char * mot) -> (mot * mot)
+   exemple : echange ([],'m',['i';'n';'i';'s';'t';'r';'e']) ([],'s',['e';'c';'h';'e'])
+*)
+
+let echange ((debut1,l1,fin1) : (mot * char * mot)) ((debut2,l2,fin2) : (mot * char * mot)) : (mot*mot) =
+  (debut1@(l2::fin1), debut2@(l1::fin2));;
+
+echange ([],'m',['i';'n';'i';'s';'t';'r';'e']) ([],'s',['e';'c';'h';'e']);;
