@@ -557,6 +557,7 @@ intersectionmultiens [(1,2);(2,3)] [(4,2)];; (* - : int multiens = [] *)
 
 type mot = char list;;
 type dico = mot ensemble;; 
+type phrase = mot list;;
 
 (* Quelques fonction pour faciliter les futurss examples *)
 let rec mot_of_string (s : string) : mot =
@@ -564,7 +565,7 @@ let rec mot_of_string (s : string) : mot =
     if i < 0 then sub else explode (s.[i] :: sub) (i-1)in
   explode [](String.length s - 1);;
 
-let rec phrase_of_string(s : string) : mot list =
+let rec phrase_of_string(s : string) : phrase =
   let rec explode phrase mot i =
     if i < 0 then mot::phrase
     else
@@ -626,9 +627,13 @@ ajout ['o';'u';'i'] [];;
 (* - : dico = [['o'; 'u'; 'i']] *)
 
 (* 4. Enrichissez ce dictionnaire afin de permettre deux exemples de vos propres contrepeteries. *)
-let mondico = ajout ['l';'a'] mondico;;
-let mondico = ajout ['p';'e';'r';'c';'e';'u';'s';'e'] mondico;;
-let mondico = ajout ['v';'i';'s';'s';'e';'u';'s';'e'] mondico;;
+let mondico = ajout (mot_of_string "la") mondico;;
+let mondico = ajout (mot_of_string "perceuse") mondico;;
+let mondico = ajout (mot_of_string "visseuse") mondico;;
+let mondico = ajout (mot_of_string "sinistre") mondico;;
+let mondico = ajout (mot_of_string "meche") mondico;;
+let mondico = ajout (mot_of_string "verceuse") mondico;;
+let mondico = ajout (mot_of_string "pisseuse") mondico;;
 
 (* La perceuse visseuse *)
 
@@ -726,7 +731,7 @@ Semantique : estcontrepetrievalide phrase1 phrase2 retourne true si les listes s
 implantation :
 *)
 
-let estcontrepetrievalide (phr1 : mot list)( phr2 : mot list) : bool =
+let estcontrepetrievalide (phr1 : phrase)( phr2 : phrase) : bool =
   if List.length phr1 <> 2 || List.length phr2 <> 2 then
       false
     else
@@ -753,8 +758,8 @@ Realisation :
 implantation : 
 *)
 
-let sontsimplecontrepeteries (phr1: mot list) (phr2: mot list): bool=
-  let rec iterate (phr : mot list) (refe : mot list) : mot list =
+let sontsimplecontrepeteries (phr1: phrase) (phr2: phrase): bool=
+  let rec iterate (phr : phrase) (refe : phrase) : phrase =
     match phr with
       | [] -> []
       | h::t -> if appartient h refe then iterate t refe else h::(iterate t refe)
@@ -832,4 +837,82 @@ decompose [];; (* - : (mot * char * mot) ensemble = [] *)
 let echange ((debut1,l1,fin1) : (mot * char * mot)) ((debut2,l2,fin2) : (mot * char * mot)) : (mot*mot) =
   (debut1@(l2::fin1), debut2@(l1::fin2));;
 
+(* test *)
 echange ([],'m',['i';'n';'i';'s';'t';'r';'e']) ([],'s',['e';'c';'h';'e']);;
+(* - : mot * mot = (['s'; 'i'; 'n'; 'i'; 's'; 't'; 'r'; 'e'], ['m'; 'e'; 'c'; 'h'; 'e']) *)
+
+(* Specification
+   profil : contrepetrie : phrase -> dico -> phrase ensemble
+*)
+(* ATTENTION : FERMEZ VOS YEUX *)
+let contrepetrie (phr : phrase)(dico : dico) : phrase ensemble =
+  let rec generate (phr : phrase) ((deb,fin) : (phrase * phrase)) : phrase ensemble =
+    (* On commence par parcourir la phrase afin de trouver un mot appartenant au dictionnaire *)
+    match phr with
+      | [] -> []
+      | h::t -> if present h dico then
+	  let decomp1 = decompose h in
+	    (* ce mot est dans le dictionnaire ! on parcours la fin de la phrase pour trouver un second mot *)
+	  let rec subgenerate (subphr : phrase)((subdeb,subfin) : (phrase * phrase)) =
+	      match subphr with
+		| [] -> []
+		| sh::st -> if present sh dico then
+		    (* Ce nouveau mot est present aussi dans le dictionnaire, on va pouvoir generer des contrepetrie avec ces mots *)
+		    let decomp2 = decompose sh in
+		      
+		      (* On va parcourir l'emsemble des decompositions du premier mot et essayer des contrepetries *)
+		    let rec parcourirDecomp decomp refe = 
+		      match decomp with
+			| [] -> []
+		    
+	          (* Ce mot n'est pas une contrepétrie.. on continue en sauvegardant notre progression dans le fin de la phrase *)
+		  else subgenerate (st)(subdeb@[sh], st)
+	  in subgenerate t ([], t)
+	(* Ce mot n'est pas dans le dictionnaire, on continue d'iterer en sauvegardant notre progression *)
+	else generate t (deb@[h], t)
+in generate phr ([], phr);;
+
+(*let contrepetrie (phr : phrase)(dico : dico) : phrase ensemble =*)
+
+
+(*#########################################################*)
+(*#                                                       #*)
+(*#                         BONUS                         #*)
+(*#                                                       #*)
+(*#########################################################*)
+
+(* Le dictionnaire efficace *)
+
+(* Representation en forme d'arbre du dictionnaire *)
+type dico = DNil | DNode of (dico * mot * dico);;
+
+let rec present (mot :mot)(dico : dico) : bool =
+  match dico with
+    | DNil -> false
+    | DNode(dic1, smot, dic2) when mot = smot -> true
+    | DNode(dic1, smot, dic2) ->  if mot > smot then present mot dic1 else present mot dic2;;
+
+
+let rec ajout (mot: mot)(dico:dico) : dico =
+if present mot dico then
+  dico
+else
+  match dico with
+    | DNil -> DNode(DNil, mot, DNil)
+    | DNode(dic1, smot, dic2) -> if mot > smot then DNode(dic1, smot, ajout mot dic2) else DNode(ajout mot dic1, smot, dic2);;
+
+(* Petite fonction bonus de bonus pour visualiser le dictionnaire sous forme de liste *)
+let rec afficherdictionnaire (dico:dico): mot list =
+  match dico with
+    | DNil -> []
+    | DNode(dic1, mot, dic2) -> (afficherdictionnaire dic1)@(mot::(afficherdictionnaire dic2));;
+
+(* Test d'ajout dans le dictionnaire *)
+let nouveaudico = ajout (mot_of_string "quelle") DNil;;
+let nouveaudico = ajout (mot_of_string "ministre") nouveaudico;;
+let nouveaudico = ajout (mot_of_string "seche") nouveaudico;;
+let nouveaudico = ajout (mot_of_string "sinistre") nouveaudico;;
+let nouveaudico = ajout (mot_of_string "meche") nouveaudico;;
+
+afficherdictionnaire nouveaudico;;
+(* Nous avons maintenant un dictionnaire efficace *)

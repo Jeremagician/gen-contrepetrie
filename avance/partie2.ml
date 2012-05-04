@@ -426,8 +426,6 @@ differencesymetriquemultiens ([(1,1);(2,1)])([(2,1);(3,1)]);;
             Reecritures avec fold
 ****************************************************)
 
-(* Erreur *)
-
 let cardinal (ens: 'e list): int = List.fold_left (fun a b -> a + 1) 0 ens;;
 
 (*--------------
@@ -627,15 +625,24 @@ ajout ['o';'u';'i'] [];;
 (* - : dico = [['o'; 'u'; 'i']] *)
 
 (* 4. Enrichissez ce dictionnaire afin de permettre deux exemples de vos propres contrepeteries. *)
-let mondico = ajout (mot_of_string "la") mondico;;
-let mondico = ajout (mot_of_string "perceuse") mondico;;
-let mondico = ajout (mot_of_string "visseuse") mondico;;
+
 let mondico = ajout (mot_of_string "sinistre") mondico;;
 let mondico = ajout (mot_of_string "meche") mondico;;
+
+
+
+
+(* La perceuse visseuse *) 
+let mondico = ajout (mot_of_string "perceuse") mondico;;
+let mondico = ajout (mot_of_string "visseuse") mondico;;
 let mondico = ajout (mot_of_string "verceuse") mondico;;
 let mondico = ajout (mot_of_string "pisseuse") mondico;;
 
-(* La perceuse visseuse *)
+(* J'aime vachement votre frangin *)
+let mondico = ajout (mot_of_string "vachement") mondico;;
+let mondico = ajout (mot_of_string "frangin") mondico;;
+let mondico = ajout (mot_of_string "fachement") mondico;;
+let mondico = ajout (mot_of_string "vagin") mondico;;
 
 (***************************************************
             Verificateur de contrepet
@@ -841,68 +848,87 @@ let echange ((debut1,l1,fin1) : (mot * char * mot)) ((debut2,l2,fin2) : (mot * c
 echange ([],'m',['i';'n';'i';'s';'t';'r';'e']) ([],'s',['e';'c';'h';'e']);;
 (* - : mot * mot = (['s'; 'i'; 'n'; 'i'; 's'; 't'; 'r'; 'e'], ['m'; 'e'; 'c'; 'h'; 'e']) *)
 
+(* 
+###############################################
+#             Fonction contrepétrie           #
+###############################################
+*)
+
 (* Specification
-   profil : contrepetrie : phrase -> dico -> phrase ensemble
+profil : finirdecomp : phrase->dico->(phrase*phrase*phrase))->mot*char*mot->mot*char*mot ensemble->phrase ensemble 
+semantique : omfg
+
+Equation recursive : finirdecomp (phrase) (dico) ((debut,milieu,fin)) (current1) [] -> []
+                     finirdecomp (phrase) (dico) ((debut,milieu,fin)) (current1) (decomp2) -> SOIT (echange1, echange2) = echange current1 h
+                                                                                           -> SI present echange1 dico & present echange2 dico & sontsimplecontrepeteries (phrase)(debut@[echange1]@milieu@[echange2]@fin) ALORS (debut@[echange1]@milieu@[echange2]@fin)::(finirdecomp phrase dico ((debut, milieu, fin)) current1 t)
+                                                                                           -> SINON finirdecomp phrase dico ((debut, milieu, fin)) current1 t
+
+Terminaison :
+   soit mesure(liste) = le nombre d'element de liste
+   mesure(element::liste) = mesure(liste) +1
+   d'ou mesure(element::liste) > mesure(liste)
+   d'ou mesure est décroissante, minorée par 0
+
+   On considere mesure(decomp2), or mesure est decroissante minorée par 0 donc la fonction termine
+
+Implantation : 
 *)
 
-(* ATTENTION : Lisez la fonction progressivement, en suivant les commentaires !!! *)
-(*
+let rec finirdecomp (phrase : phrase) (dico:dico)((debut, milieu, fin) : (phrase*phrase*phrase))(current1: mot*char*mot)(decomp2: (mot*char*mot) ensemble) : phrase ensemble =
+  match decomp2 with
+    | [] -> []
+    | h::t -> let (echange1, echange2) = echange current1 h in
+	if present echange1 dico & present echange2 dico & sontsimplecontrepeteries (phrase)(debut@[echange1]@milieu@[echange2]@fin) then
+	  (debut@[echange1]@milieu@[echange2]@fin)::(finirdecomp phrase dico ((debut, milieu, fin)) current1 t)
+	else
+	  finirdecomp phrase dico ((debut, milieu, fin)) current1 t;;
 
+(* Specification
+Profil : parcourirdecomp : phrase->dico->phrase*phrase*phrase->mot*char*mot ensemble->mot*char*mot ensemble->phrase ensemble
+Semantique :
 
-*)
-(*
-let contrepetrie (phrase : phrase)(dico : dico) : phrase ensemble =
-  let rec generate (phr : phrase) (deb: phrase) (ens : phrase ensemble): phrase ensemble =
-    (* On commence par parcourir la phrase afin de trouver un mot appartenant au dictionnaire *)
-    match phr with
-      | [] -> ens
-      | h::t -> if present h dico then
-	    (* ce mot est dans le dictionnaire ! on parcours la fin de la phrase pour trouver un second mot *)
-	  let rec subgenerate (subphr : phrase)(subdeb : phrase)(ens1 : phrase ensemble) =
-	      match subphr with
-		| [] -> ens1
-		| sh::st -> if present sh dico then
-		    (* Ce nouveau mot est present aussi dans le dictionnaire, on va pouvoir generer des contrepetrie avec ces mots *)
-		      (* On va parcourir l'emsemble des decompositions du premier mot et essayer des contrepetries *)
-		    let rec parcourirdecompmot1 decompmot1 = 
-		      match decompmot1 with
-			| [] -> subgenerate st (subdeb@[sh]) ens1
-			(* Pour chaque décomposition, nous allons parcourir la decomposition du second mot *)
-			| dh::dt -> let rec parcourirdecompmot2 decompmot2 =
-			    match decompmot2 with
-			      | [] -> parcourirdecompmot1 dt
-			      | dh2::dt2 -> let (mot1, mot2) = echange(dh)(dh2) in (* ça foire ici !!! *)
-				  (* on verifie si les nouveau mot sont bien dans le dictionnaire et que la phrase est une simple contrepetrie *)
-				  if present mot1 dico & present mot2 dico & sontsimplecontrepeteries phrase (deb@[mot1]@subdeb@[mot2]@st) then
-				      (deb@[mot1]@subdeb@[mot2]@st)::ens1
-				 else
-				    parcourirdecompmot2 dt2
-			  in parcourirdecompmot2 (decompose sh)
-		    in parcourirdecompmot1 (decompose h)
-	          (* Ce mot n'est pas une contrepétrie.. on continue en sauvegardant notre progression dans le fin de la phrase *)
-		  else subgenerate (st)(subdeb@[sh]) ens1
-	  in subgenerate t [] ens
-	(* Ce mot n'est pas dans le dictionnaire, on continue d'iterer en sauvegardant notre progression *)
-	else generate t (deb@[h]) ens
-in generate phrase [] [];;
-*)
+Equation recursive : parcourirdecomp phrase dico (debut,milieu,fin) [] decomp2 =  []
+                     parcourirdecomp phrase dico (debut,milieu,fin) h::t decomp2 =  (finirdecomp phrase dico ((debut, milieu, fin)) h decomp2  )@(parcourirdecomp phrase dico ((debut, milieu, fin)) (t)(decomp2))
 
-let rec finirdecomp decomp
+Terminaison : On considere mesure(decomp1), or mesure est decroissante minorée par 0 donc la fonction termine
+
+Implantation : *)
 
 let rec parcourirdecomp (phrase:phrase)(dico:dico)((debut, milieu, fin) : (phrase*phrase*phrase)) (decomp1)(decomp2): phrase ensemble =
   match decomp1 with
       | [] -> []
-      | h::t -> (finirdecomp )::parcourirdecomp phrase dico ((debut, milieu, fin)) (t)(decomp2)
+      | h::t -> (finirdecomp phrase dico ((debut, milieu, fin)) h decomp2  )@(parcourirdecomp phrase dico ((debut, milieu, fin)) (t)(decomp2))
+
+(* Semantique
+profil : finirphrase -> phrase -> dico -> phrase*phrase -> mot -> phrase -> phrase ensemble
+Semantique : [COUCOU JEREMY LOOOOL]
+
+Equation recursive : finirphrase phrase dico (deb,[]) mot phrase -> phrase ensemble = []
+                     finnirphrase phrase dico (deb,h::t) =  SI present h dico ALORS (parcourirdecomp phrase dico (debut, deb, t) (decompose mot1) (decompose h))@(finirphrase phrase dico(deb@[h], t) mot1 debut)
+                                                            SINON finirphrase phrase dico (deb@[h], t) mot1 debut
+
+Terminaison : On considere mesure(fin), or mesure est decroissante minorée par 0 donc la fonction termine
+Implantation: *)
 
 let rec finirphrase (phrase:phrase)(dico:dico)((deb, fin):(phrase*phrase)) (mot1:mot)(debut:phrase): phrase ensemble =
   match fin with
     |[] -> []
-    | h::t -> if prensent h dico then
+    | h::t -> if present h dico then
 	(* On retourne la nouvelle phrase *)
-	(parcourirdecomp phrase dico (debut, deb@[h], t) mot1 h)@finirphrase phrase dico(deb@[h], t) mot1
+	(parcourirdecomp phrase dico (debut, deb, t) (decompose mot1) (decompose h))@(finirphrase phrase dico(deb@[h], t) mot1 debut)
       else
-	finirphrase phrase dico (deb@[h], t) mot1;;
+	finirphrase phrase dico (deb@[h], t) mot1 debut;;
 
+(* Specification
+Profil: parcourirphrase -> phrase -> dico -> (phrase*phrase) -> phrase ensemble
+Semantique:
+
+Equation recursive : parcourirphrase  phrase dico (debut,[]) = []
+                     parcourirphrase phrase dico (debut,h::t) = SI present h dico ALORS (finirphrase phrase dico ([],t) h debut)@(parcourirphrase phrase dico (debut@[h],t))
+                                                                SINON parcourirphrase phrase dico(debut@[h],t);;
+
+Terminaison : On considere mesure(fin), or mesure est decroissante minorée par 0 donc la fonction termine
+*)
 let rec parcourirphrase (phrase:phrase)(dico:dico)((debut, fin):(phrase*phrase)) : phrase ensemble =
   match fin with
     | [] -> []
@@ -911,10 +937,31 @@ let rec parcourirphrase (phrase:phrase)(dico:dico)((debut, fin):(phrase*phrase))
       else
 	parcourirphrase phrase dico(debut@[h],t);;
 
-let contrepetrie (phrase : phrase)(dico : dico) : phrase ensemble =
-  parcourirphrase phrase dico ([],phrase);;
+(* Specification
+Profil: contrepetrie : phrase -> dico -> phrase*phrase -> phrase ensemble
+Semantique: contrepetrie (phrase) (dico) retourne toutes les contrepetrie possible de la phrase en fonction du dico
+Exemple: contrepetrie (phrase_of_string "la ministre seche  perceuse visseuse") mondico = 
+[[['l'; 'a']; ['s'; 'i'; 'n'; 'i'; 's'; 't'; 'r'; 'e'];
+  ['m'; 'e'; 'c'; 'h'; 'e']; []; ['p'; 'e'; 'r'; 'c'; 'e'; 'u'; 's'; 'e'];
+  ['v'; 'i'; 's'; 's'; 'e'; 'u'; 's'; 'e']];
+ [['l'; 'a']; ['m'; 'i'; 'n'; 'i'; 's'; 't'; 'r'; 'e'];
+  ['s'; 'e'; 'c'; 'h'; 'e']; []; ['v'; 'e'; 'r'; 'c'; 'e'; 'u'; 's'; 'e'];
+  ['p'; 'i'; 's'; 's'; 'e'; 'u'; 's'; 'e']]]
+
+Implantation : *)
 
 contrepetrie (phrase_of_string "quelle ministre seche") mondico;;
+contrepetrie (phrase_of_string "la ministre seche  perceuse visseuse") mondico;;
+
+
+let mondico = ajout (mot_of_string "mare") mondico;;
+let mondico = ajout (mot_of_string "rare") mondico;;
+let mondico = ajout (mot_of_string "tare") mondico;;
+let mondico = ajout (mot_of_string "rame") mondico;;
+
+contrepetrie (phrase_of_string "Il y a une rame une mare et une tare") mondico;; 
+
+
 (*#########################################################*)
 (*#                                                       #*)
 (*#                         BONUS                         #*)
